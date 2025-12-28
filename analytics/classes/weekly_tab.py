@@ -1,41 +1,38 @@
 """
 Weekly tab class module.
-Implements the weekly analytics dashboard view.
+Handles rendering and presentation of weekly analytics dashboard.
 """
 from datetime import datetime, timedelta
 import sys
 from pathlib import Path
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from classes.base_tab import BaseTab
-from utils.data_loader import DataLoader
-from utils.metric_loader import MetricLoader
+from reporting.weekly.weekly_report import WeeklyReport
 
 
 class WeeklyTab(BaseTab):
-    """Weekly analytics view for call center metrics."""
+    """Weekly analytics view - handles rendering and UI presentation only."""
 
     def __init__(self):
         """Initialize WeeklyTab."""
         super().__init__(title="Weekly Analytics", icon="")
-        self.data_loader = DataLoader()
-        self.metric_loader = MetricLoader(self.data_loader)
+        self.report = WeeklyReport()
 
     def render(self) -> None:
         """Render the weekly analytics dashboard."""
         self.render_header()
 
-        # Get date range for current and previous week
-        current_week_start, current_week_end = self._get_current_week_range()
-        previous_week_start, previous_week_end = self._get_previous_week_range()
+        # Get date ranges from report logic
+        current_week_start, current_week_end = self.report.get_current_week_range()
+        previous_week_start, previous_week_end = self.report.get_previous_week_range()
 
-        # Date selection
+        # Date selection UI
         col1, col2 = st.columns(2)
         with col1:
             selected_date = st.date_input(
@@ -51,43 +48,19 @@ class WeeklyTab(BaseTab):
             st.write("")
             refresh_btn = st.button("Refresh Data", key="weekly_refresh")
             if refresh_btn:
-                self.data_loader.clear_cache()
+                self.report.refresh_data()
                 st.rerun()
 
-        # Calculate metrics
-        current_metrics = self.metric_loader.calculate_productivity_metrics(
-            week_start, week_end
-        )
-        previous_metrics = self.metric_loader.calculate_productivity_metrics(
-            previous_week_start, previous_week_end
-        )
-        deltas = self.metric_loader.calculate_deltas(current_metrics, previous_metrics)
+        # Get metrics from report logic
+        current_metrics = self.report.get_productivity_metrics(week_start, week_end)
+        previous_metrics = self.report.get_productivity_metrics(previous_week_start, previous_week_end)
+        deltas = self.report.get_deltas(current_metrics, previous_metrics)
 
-        # Display KPIs
+        # Render UI components
         self._render_kpi_section(current_metrics, deltas)
-
-        # Display detailed metrics
         self._render_detailed_metrics(week_start, week_end)
-
-        # Display charts
         self._render_charts(week_start, week_end)
-
-        # Display agent comparison
         self._render_agent_comparison(week_start, week_end)
-
-    def _get_current_week_range(self) -> tuple:
-        """Get the current week date range (Monday to Sunday)."""
-        today = datetime.now()
-        week_start = today - timedelta(days=today.weekday())
-        week_end = week_start + timedelta(days=6)
-        return week_start, week_end
-
-    def _get_previous_week_range(self) -> tuple:
-        """Get the previous week date range."""
-        current_start, _ = self._get_current_week_range()
-        week_end = current_start - timedelta(days=1)
-        week_start = week_end - timedelta(days=6)
-        return week_start, week_end
 
     def _render_kpi_section(self, current: dict, deltas: dict) -> None:
         """Render KPI metrics section."""
@@ -96,7 +69,7 @@ class WeeklyTab(BaseTab):
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            delta_value = f"{deltas['total_calls']['percentage']:.1f}%" if deltas['total_calls']['percentage'] != 0 else None
+            delta_value = f"{deltas['total_calls']['percentage']:.1f}%" if deltas['total_calls']['percentage'] != 0 else "-"
             st.metric(
                 "Total Calls",
                 f"{current['total_calls']:,}",
@@ -104,7 +77,7 @@ class WeeklyTab(BaseTab):
             )
 
         with col2:
-            delta_value = f"{deltas['avg_call_duration']['percentage']:.1f}%" if deltas['avg_call_duration']['percentage'] != 0 else None
+            delta_value = f"{deltas['avg_call_duration']['percentage']:.1f}%" if deltas['avg_call_duration']['percentage'] != 0 else "-"
             st.metric(
                 "Avg Duration",
                 f"{current['avg_call_duration']:.1f} min",
@@ -112,7 +85,7 @@ class WeeklyTab(BaseTab):
             )
 
         with col3:
-            delta_value = f"{deltas['unique_agents']['percentage']:.1f}%" if deltas['unique_agents']['percentage'] != 0 else None
+            delta_value = f"{deltas['unique_agents']['percentage']:.1f}%" if deltas['unique_agents']['percentage'] != 0 else "-"
             st.metric(
                 "Active Agents",
                 f"{current['unique_agents']:.0f}",
@@ -120,7 +93,7 @@ class WeeklyTab(BaseTab):
             )
 
         with col4:
-            delta_value = f"{deltas['unique_clients']['percentage']:.1f}%" if deltas['unique_clients']['percentage'] != 0 else None
+            delta_value = f"{deltas['unique_clients']['percentage']:.1f}%" if deltas['unique_clients']['percentage'] != 0 else "-"
             st.metric(
                 "Unique Clients",
                 f"{current['unique_clients']:.0f}",
@@ -132,7 +105,7 @@ class WeeklyTab(BaseTab):
         st.subheader("Weekly Breakdown")
 
         try:
-            daily_metrics = self.metric_loader.get_daily_metrics(date_from, date_to)
+            daily_metrics = self.report.get_daily_metrics(date_from, date_to)
 
             st.write("**Daily Summary**")
             display_df = daily_metrics.copy()
@@ -150,7 +123,7 @@ class WeeklyTab(BaseTab):
         st.subheader("Weekly Visualizations")
 
         try:
-            daily_metrics = self.metric_loader.get_daily_metrics(date_from, date_to)
+            daily_metrics = self.report.get_daily_metrics(date_from, date_to)
 
             col1, col2 = st.columns(2)
 
@@ -198,7 +171,7 @@ class WeeklyTab(BaseTab):
         st.subheader("Agent Performance Comparison")
 
         try:
-            agent_metrics = self.metric_loader.calculate_cost_per_agent(date_from, date_to)
+            agent_metrics = self.report.get_agent_metrics(date_from, date_to)
 
             if len(agent_metrics) > 0:
                 col1, col2 = st.columns(2)

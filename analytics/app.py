@@ -5,13 +5,9 @@ Main application entry point for the Streamlit dashboard.
 import streamlit as st
 from pathlib import Path
 import sys
-import os
 
-# Set working directory to the analytics folder
+# Add analytics folder to path for imports
 analytics_dir = Path(__file__).parent
-os.chdir(analytics_dir)
-
-# Add analytics to path
 sys.path.insert(0, str(analytics_dir))
 
 from classes.monthly_tab import MonthlyTab
@@ -29,35 +25,57 @@ def setup_page_config():
 
 
 def setup_styling():
-    """Apply custom CSS styling with blue sidebar."""
+    """Apply custom CSS styling with light gray sidebar."""
     st.markdown("""
     <style>
+    /* Reduce top padding and margins */
+    .main {
+        padding-top: 0rem;
+    }
+    
+    [data-testid="stAppViewContainer"] {
+        padding-top: 1rem;
+    }
+    
     /* Sidebar styling */
     [data-testid="stSidebar"] {
-        background-color: #1e3a8a;
+        background-color: #F2F2F2;
     }
     
     /* Sidebar text styling */
     [data-testid="stSidebar"] .css-1d391kg {
-        color: white;
+        color: #333333;
     }
     
     [data-testid="stSidebar"] h2 {
-        color: white;
+        color: #333333;
     }
     
     [data-testid="stSidebar"] p {
-        color: white;
+        color: #333333;
     }
     
+    /* Button styling - default state */
     [data-testid="stSidebar"] button {
-        background-color: #3b82f6;
-        color: white;
-        border: none;
+        background-color: #ffffff !important;
+        color: #333333 !important;
+        border: 2px solid #3b82f6 !important;
+        font-weight: 500 !important;
     }
     
+    /* Button hover state */
     [data-testid="stSidebar"] button:hover {
-        background-color: #2563eb;
+        background-color: #2563eb !important;
+        color: white !important;
+        border: 2px solid #2563eb !important;
+    }
+    
+    /* Button active/focus state - when selected */
+    [data-testid="stSidebar"] button:active,
+    [data-testid="stSidebar"] button:focus {
+        background-color: #2563eb !important;
+        color: white !important;
+        border: 2px solid #2563eb !important;
     }
     
     /* Metric styling */
@@ -77,12 +95,24 @@ def render_sidebar():
     st.sidebar.title("Call Center Analytics")
     st.sidebar.markdown("---")
     
-    # Report selection
-    report_type = st.sidebar.radio(
-        "Select Report",
-        options=["Monthly Report", "Weekly Report"],
-        index=0,
-    )
+    # Initialize session state for report selection
+    if "report_type" not in st.session_state:
+        st.session_state.report_type = "Monthly Report"
+    
+    # Create buttons stacked vertically
+    if st.sidebar.button(
+        "Monthly Report",
+        key="btn_monthly",
+        use_container_width=True,
+    ):
+        st.session_state.report_type = "Monthly Report"
+    
+    if st.sidebar.button(
+        "Weekly Report",
+        key="btn_weekly",
+        use_container_width=True,
+    ):
+        st.session_state.report_type = "Weekly Report"
     
     st.sidebar.markdown("---")
     
@@ -105,7 +135,7 @@ def render_sidebar():
     - Agent performance tracking
     """)
     
-    return report_type
+    return st.session_state.report_type
 
 
 def render_main_dashboard(report_type):

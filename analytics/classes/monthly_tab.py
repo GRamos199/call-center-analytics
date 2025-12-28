@@ -1,42 +1,38 @@
 """
 Monthly tab class module.
-Implements the monthly analytics dashboard view.
+Handles rendering and presentation of monthly analytics dashboard.
 """
 from datetime import datetime, timedelta
 import sys
 from pathlib import Path
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 import plotly.express as px
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from classes.base_tab import BaseTab
-from utils.data_loader import DataLoader
-from utils.metric_loader import MetricLoader
-import re
+from reporting.monthly.monthly_report import MonthlyReport
 
 
 class MonthlyTab(BaseTab):
-    """Monthly analytics view for call center metrics."""
+    """Monthly analytics view - handles rendering and UI presentation only."""
 
     def __init__(self):
         """Initialize MonthlyTab."""
         super().__init__(title="Monthly Analytics", icon="")
-        self.data_loader = DataLoader()
-        self.metric_loader = MetricLoader(self.data_loader)
+        self.report = MonthlyReport()
 
     def render(self) -> None:
         """Render the monthly analytics dashboard."""
         self.render_header()
         
-        # Get date range for current and previous month
-        current_month_start, current_month_end = self._get_current_month_range()
-        previous_month_start, previous_month_end = self._get_previous_month_range()
+        # Get date ranges from report logic
+        current_month_start, current_month_end = self.report.get_current_month_range()
+        previous_month_start, previous_month_end = self.report.get_previous_month_range()
 
-        # Date selection
+        # Date selection UI
         col1, col2 = st.columns(2)
         with col1:
             selected_month = st.date_input(
@@ -52,45 +48,18 @@ class MonthlyTab(BaseTab):
             st.write("")
             refresh_btn = st.button("Refresh Data", key="monthly_refresh")
             if refresh_btn:
-                self.data_loader.clear_cache()
+                self.report.refresh_data()
                 st.rerun()
 
-        # Calculate metrics
-        current_metrics = self.metric_loader.calculate_productivity_metrics(
-            month_start, month_end
-        )
-        previous_metrics = self.metric_loader.calculate_productivity_metrics(
-            previous_month_start, previous_month_end
-        )
-        deltas = self.metric_loader.calculate_deltas(current_metrics, previous_metrics)
+        # Get metrics from report logic
+        current_metrics = self.report.get_productivity_metrics(month_start, month_end)
+        previous_metrics = self.report.get_productivity_metrics(previous_month_start, previous_month_end)
+        deltas = self.report.get_deltas(current_metrics, previous_metrics)
 
-        # Display KPIs
+        # Render UI components
         self._render_kpi_section(current_metrics, deltas)
-
-        # Display detailed metrics
         self._render_detailed_metrics(month_start, month_end)
-
-        # Display charts
         self._render_charts(month_start, month_end)
-
-    def _get_current_month_range(self) -> tuple:
-        """Get the current month date range."""
-        today = datetime.now()
-        month_start = datetime(year=today.year, month=today.month, day=1)
-        month_end = (month_start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
-        return month_start, month_end
-
-    def _get_previous_month_range(self) -> tuple:
-        """Get the previous month date range."""
-        today = datetime.now()
-        month_start = datetime(year=today.year, month=today.month, day=1)
-        previous_month_end = month_start - timedelta(days=1)
-        previous_month_start = datetime(
-            year=previous_month_end.year,
-            month=previous_month_end.month,
-            day=1
-        )
-        return previous_month_start, previous_month_end
 
     def _render_kpi_section(self, current: dict, deltas: dict) -> None:
         """Render KPI metrics section."""
@@ -99,7 +68,7 @@ class MonthlyTab(BaseTab):
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            delta_value = f"{deltas['total_calls']['percentage']:.1f}%" if deltas['total_calls']['percentage'] != 0 else None
+            delta_value = f"{deltas['total_calls']['percentage']:.1f}%" if deltas['total_calls']['percentage'] != 0 else "-"
             st.metric(
                 "Total Calls",
                 f"{current['total_calls']:,}",
@@ -107,7 +76,7 @@ class MonthlyTab(BaseTab):
             )
 
         with col2:
-            delta_value = f"{deltas['avg_call_duration']['percentage']:.1f}%" if deltas['avg_call_duration']['percentage'] != 0 else None
+            delta_value = f"{deltas['avg_call_duration']['percentage']:.1f}%" if deltas['avg_call_duration']['percentage'] != 0 else "-"
             st.metric(
                 "Avg Duration",
                 f"{current['avg_call_duration']:.1f} min",
@@ -115,7 +84,7 @@ class MonthlyTab(BaseTab):
             )
 
         with col3:
-            delta_value = f"{deltas['unique_agents']['percentage']:.1f}%" if deltas['unique_agents']['percentage'] != 0 else None
+            delta_value = f"{deltas['unique_agents']['percentage']:.1f}%" if deltas['unique_agents']['percentage'] != 0 else "-"
             st.metric(
                 "Active Agents",
                 f"{current['unique_agents']:.0f}",
@@ -123,7 +92,7 @@ class MonthlyTab(BaseTab):
             )
 
         with col4:
-            delta_value = f"{deltas['calls_per_agent']['percentage']:.1f}%" if deltas['calls_per_agent']['percentage'] != 0 else None
+            delta_value = f"{deltas['calls_per_agent']['percentage']:.1f}%" if deltas['calls_per_agent']['percentage'] != 0 else "-"
             st.metric(
                 "Calls/Agent",
                 f"{current['calls_per_agent']:.1f}",
@@ -135,7 +104,7 @@ class MonthlyTab(BaseTab):
         st.subheader("Agent Metrics")
 
         try:
-            agent_metrics = self.metric_loader.calculate_cost_per_agent(date_from, date_to)
+            agent_metrics = self.report.get_agent_metrics(date_from, date_to)
             
             col1, col2 = st.columns([2, 2])
 
@@ -167,7 +136,7 @@ class MonthlyTab(BaseTab):
         st.subheader("Visualizations")
 
         try:
-            daily_metrics = self.metric_loader.get_daily_metrics(date_from, date_to)
+            daily_metrics = self.report.get_daily_metrics(date_from, date_to)
 
             col1, col2 = st.columns(2)
 
@@ -207,7 +176,7 @@ class MonthlyTab(BaseTab):
                 st.plotly_chart(fig, use_container_width=True)
 
             # Agent distribution
-            agent_metrics = self.metric_loader.calculate_cost_per_agent(date_from, date_to)
+            agent_metrics = self.report.get_agent_metrics(date_from, date_to)
             fig = px.bar(
                 agent_metrics.head(10),
                 x="agent_name",
