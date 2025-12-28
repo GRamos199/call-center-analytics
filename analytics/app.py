@@ -12,82 +12,7 @@ sys.path.insert(0, str(analytics_dir))
 
 from classes.monthly_tab import MonthlyTab
 from classes.weekly_tab import WeeklyTab
-
-
-def setup_page_config():
-    """Configure Streamlit page settings."""
-    st.set_page_config(
-        page_title="Call Center Analytics",
-        page_icon="📊",
-        layout="wide",
-        initial_sidebar_state="expanded",
-    )
-
-
-def setup_styling():
-    """Apply custom CSS styling with light gray sidebar."""
-    st.markdown("""
-    <style>
-    /* Reduce top padding and margins */
-    .main {
-        padding-top: 0rem;
-    }
-    
-    [data-testid="stAppViewContainer"] {
-        padding-top: 1rem;
-    }
-    
-    /* Sidebar styling */
-    [data-testid="stSidebar"] {
-        background-color: #F2F2F2;
-    }
-    
-    /* Sidebar text styling */
-    [data-testid="stSidebar"] .css-1d391kg {
-        color: #333333;
-    }
-    
-    [data-testid="stSidebar"] h2 {
-        color: #333333;
-    }
-    
-    [data-testid="stSidebar"] p {
-        color: #333333;
-    }
-    
-    /* Button styling - default state */
-    [data-testid="stSidebar"] button {
-        background-color: #ffffff !important;
-        color: #333333 !important;
-        border: 2px solid #3b82f6 !important;
-        font-weight: 500 !important;
-    }
-    
-    /* Button hover state */
-    [data-testid="stSidebar"] button:hover {
-        background-color: #2563eb !important;
-        color: white !important;
-        border: 2px solid #2563eb !important;
-    }
-    
-    /* Button active/focus state - when selected */
-    [data-testid="stSidebar"] button:active,
-    [data-testid="stSidebar"] button:focus {
-        background-color: #2563eb !important;
-        color: white !important;
-        border: 2px solid #2563eb !important;
-    }
-    
-    /* Metric styling */
-    [data-testid="stMetricValue"] {
-        font-size: 32px;
-    }
-    
-    [data-testid="stMetricLabel"] {
-        font-size: 16px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+from classes.style_manager import StyleManager
 
 
 def render_sidebar():
@@ -152,8 +77,7 @@ def render_main_dashboard(report_type):
 
 def main():
     """Main application entry point."""
-    setup_page_config()
-    setup_styling()
+    StyleManager.setup()
     report_type = render_sidebar()
     render_main_dashboard(report_type)
 

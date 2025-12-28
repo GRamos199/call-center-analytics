@@ -1,5 +1,0 @@
-cost_type,amount,currency,description
-hourly_rate,45.5,USD,Average hourly rate for agents
-equipment_per_agent,500.0,USD,Equipment cost per agent per year
-infrastructure,2500.0,USD,Monthly infrastructure cost
-management,3000.0,USD,Monthly management overhead

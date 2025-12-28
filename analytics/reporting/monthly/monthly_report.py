@@ -19,43 +19,54 @@ class MonthlyReport:
 
     def __init__(self):
         """Initialize MonthlyReport with data and metric loaders."""
-        self.data_loader = DataLoader()
+        self.data_loader = DataLoader(period="monthly")
         self.metric_loader = MetricLoader(self.data_loader)
 
-    def get_current_month_range(self) -> tuple:
-        """Get the current month date range."""
-        today = datetime.now()
-        month_start = datetime(year=today.year, month=today.month, day=1)
-        month_end = (month_start + timedelta(days=31)).replace(day=1) - timedelta(days=1)
-        return month_start, month_end
+    def get_available_months(self) -> pd.DataFrame:
+        """Get all available months from the data."""
+        return self.metric_loader.get_available_periods()
 
-    def get_previous_month_range(self) -> tuple:
-        """Get the previous month date range."""
-        today = datetime.now()
-        month_start = datetime(year=today.year, month=today.month, day=1)
-        previous_month_end = month_start - timedelta(days=1)
-        previous_month_start = datetime(
-            year=previous_month_end.year,
-            month=previous_month_end.month,
-            day=1
-        )
-        return previous_month_start, previous_month_end
+    def get_current_month(self) -> datetime:
+        """Get the most recent month available in the data."""
+        overall_df = self.data_loader.load_overall_data()
+        return overall_df["month"].max()
 
-    def get_productivity_metrics(self, date_from, date_to) -> dict:
-        """Get productivity metrics for the given date range."""
-        return self.metric_loader.calculate_productivity_metrics(date_from, date_to)
+    def get_previous_month(self, current_month: datetime) -> datetime:
+        """Get the month before the given month."""
+        overall_df = self.data_loader.load_overall_data()
+        months = overall_df["month"].sort_values(ascending=False).unique()
+        current_idx = list(months).index(pd.Timestamp(current_month))
+        if current_idx + 1 < len(months):
+            return months[current_idx + 1]
+        return None
 
-    def get_deltas(self, current_period, previous_period) -> dict:
+    def get_productivity_metrics(self, month_date: datetime = None) -> dict:
+        """Get productivity metrics for the given month."""
+        return self.metric_loader.calculate_productivity_metrics(month_date)
+
+    def get_deltas(self, current_metrics: dict, previous_metrics: dict) -> dict:
         """Calculate metric deltas between two periods."""
-        return self.metric_loader.calculate_deltas(current_period, previous_period)
+        return self.metric_loader.calculate_deltas(current_metrics, previous_metrics)
 
-    def get_agent_metrics(self, date_from, date_to) -> pd.DataFrame:
+    def get_agent_metrics(self, month_date: datetime = None) -> pd.DataFrame:
         """Get cost per agent metrics."""
-        return self.metric_loader.calculate_cost_per_agent(date_from, date_to)
+        return self.metric_loader.calculate_cost_per_agent(month_date)
 
-    def get_daily_metrics(self, date_from, date_to) -> pd.DataFrame:
-        """Get daily aggregated metrics."""
-        return self.metric_loader.get_daily_metrics(date_from, date_to)
+    def get_channel_metrics(self, month_date: datetime = None) -> pd.DataFrame:
+        """Get channel performance metrics."""
+        return self.metric_loader.calculate_channel_performance(month_date)
+
+    def get_daily_breakdown(self, month_date: datetime = None) -> pd.DataFrame:
+        """Get daily breakdown of calls within the month."""
+        return self.metric_loader.get_daily_breakdown(month_date)
+
+    def get_hourly_distribution(self, month_date: datetime = None) -> pd.DataFrame:
+        """Get hourly distribution of calls."""
+        return self.metric_loader.get_hourly_distribution(month_date)
+
+    def get_trend_data(self, metric_name: str, num_months: int = 12) -> pd.DataFrame:
+        """Get trend data for a metric over multiple months."""
+        return self.metric_loader.get_trend_data(metric_name, num_months)
 
     def refresh_data(self):
         """Clear cache and reload data."""
