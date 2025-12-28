@@ -13,6 +13,7 @@ sys.path.insert(0, str(analytics_dir))
 from classes.monthly_tab import MonthlyTab
 from classes.weekly_tab import WeeklyTab
 from classes.style_manager import StyleManager
+from reporting.welcome_page import WelcomePage
 
 
 def render_sidebar():
@@ -22,18 +23,25 @@ def render_sidebar():
     
     # Initialize session state for report selection
     if "report_type" not in st.session_state:
-        st.session_state.report_type = "Monthly Report"
+        st.session_state.report_type = "Welcome"
     
     # Create buttons stacked vertically
     if st.sidebar.button(
-        "Monthly Report",
+        "🏠 Home",
+        key="btn_home",
+        use_container_width=True,
+    ):
+        st.session_state.report_type = "Welcome"
+    
+    if st.sidebar.button(
+        "📅 Monthly Report",
         key="btn_monthly",
         use_container_width=True,
     ):
         st.session_state.report_type = "Monthly Report"
     
     if st.sidebar.button(
-        "Weekly Report",
+        "📆 Weekly Report",
         key="btn_weekly",
         use_container_width=True,
     ):
@@ -58,9 +66,10 @@ def render_sidebar():
 
 def render_main_dashboard(report_type):
     """Render the main dashboard content."""
-    st.markdown("# Call Center Analytics Dashboard")
-    
-    if report_type == "Monthly Report":
+    if report_type == "Welcome":
+        welcome_page = WelcomePage()
+        welcome_page.render()
+    elif report_type == "Monthly Report":
         monthly_tab = MonthlyTab()
         monthly_tab.render()
     else:

@@ -14,6 +14,19 @@ from .base_content import BaseContent
 class AgentContent(BaseContent):
     """Renders agent performance metrics and visualizations."""
 
+    def _get_date_column(self) -> str:
+        """Get the appropriate date column based on period type."""
+        return "month" if self.period_type == "monthly" else "week_start"
+
+    def _get_period_label(self, df: pd.DataFrame) -> str:
+        """Get the period label column, creating it if necessary for weekly data."""
+        if self.period_type == "monthly":
+            return "month_name"
+        else:
+            if "week_label" not in df.columns:
+                df["week_label"] = df["week_start"].dt.strftime("%b %d %Y")
+            return "week_label"
+
     def render(self, selected_period: Any, previous_period: Any = None) -> None:
         """Render the agent performance content."""
         try:
@@ -24,6 +37,15 @@ class AgentContent(BaseContent):
                 st.warning("No agent data available.")
                 return
             
+            # Add period label for weekly data
+            date_col = self._get_date_column()
+            if self.period_type == "weekly":
+                agent_df["week_label"] = agent_df["week_start"].dt.strftime("%b %d %Y")
+            
+            # Filter to last 12 periods
+            recent_periods = agent_df[date_col].drop_duplicates().nlargest(12)
+            agent_df = agent_df[agent_df[date_col].isin(recent_periods)]
+            
             # Agent filter
             selected_agent = self._render_agent_filter(agent_df)
             
@@ -31,7 +53,7 @@ class AgentContent(BaseContent):
             filtered_df = self._filter_by_agent(agent_df, selected_agent)
             
             # Get latest period for default table view
-            latest_period = filtered_df["month"].max()
+            latest_period = filtered_df[date_col].max()
             
             # Render components
             self._render_agent_table(filtered_df, selected_period, latest_period)
@@ -62,13 +84,14 @@ class AgentContent(BaseContent):
 
     def _get_period_data(self, df: pd.DataFrame, selected_period: Any, latest_period: Any) -> pd.DataFrame:
         """Get data for the selected period or latest period."""
+        date_col = self._get_date_column()
         # Use selected_period if available, otherwise use latest
         if selected_period is not None:
-            period_df = df[df["month"] == selected_period]
+            period_df = df[df[date_col] == selected_period]
             if not period_df.empty:
                 return period_df
         # Fall back to latest period
-        return df[df["month"] == latest_period]
+        return df[df[date_col] == latest_period]
 
     def _render_agent_table(self, agent_df: pd.DataFrame, selected_period: Any, latest_period: Any) -> None:
         """Render table chart with agent data."""
@@ -81,10 +104,12 @@ class AgentContent(BaseContent):
         
         # Prepare display dataframe
         display_df = period_df.copy()
+        label_col = self._get_period_label(display_df)
+        period_header = "Month" if self.period_type == "monthly" else "Week"
         
         # Select and rename columns
         display_df = display_df[[
-            "month_name", "agent_name", "department", "total_interactions",
+            label_col, "agent_name", "department", "total_interactions",
             "avg_handle_time_minutes", "resolution_rate", "customer_satisfaction_score",
             "hours_worked", "total_cost"
         ]].copy()
@@ -97,7 +122,7 @@ class AgentContent(BaseContent):
         display_df["total_cost"] = display_df["total_cost"].apply(lambda x: f"${x:,.2f}")
         
         display_df = display_df.rename(columns={
-            "month_name": "Month",
+            label_col: period_header,
             "agent_name": "Agent Name",
             "department": "Department",
             "total_interactions": "Total Interactions",

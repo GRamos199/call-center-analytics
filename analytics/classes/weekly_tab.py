@@ -45,14 +45,151 @@ class WeeklyTab(BaseTab):
         self._render_content_tabs(selected_week, prev_week)
 
     def _render_header_section(self) -> None:
-        """Render the header section (placeholder for future container design)."""
-        st.markdown("# 📆 Weekly Report")
-        st.markdown("---")
+        """Render the animated header section with gradient and floating elements."""
+        header_html = """
+<style>
+.weekly-header {
+    position: relative;
+    background: linear-gradient(135deg, #F63B83 0%, #3B82F6 50%, #83F63B 100%);
+    border-radius: 16px;
+    padding: 30px 40px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(246, 59, 131, 0.3);
+}
+.weekly-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    animation: shimmer-weekly 3s infinite linear;
+}
+@keyframes shimmer-weekly {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+}
+.weekly-header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.weekly-title-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.weekly-icon {
+    font-size: 48px;
+    animation: bounce-weekly 2s ease-in-out infinite;
+}
+@keyframes bounce-weekly {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+.weekly-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    margin: 0;
+}
+.weekly-subtitle {
+    font-size: 14px;
+    color: rgba(255,255,255,0.9);
+    margin-top: 5px;
+}
+.weekly-decoration {
+    display: flex;
+    gap: 10px;
+}
+.weekly-floating-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: float-weekly 2s ease-in-out infinite;
+}
+.weekly-floating-circle:nth-child(1) {
+    background: rgba(255,255,255,0.8);
+    animation-delay: 0s;
+}
+.weekly-floating-circle:nth-child(2) {
+    background: rgba(255,255,255,0.6);
+    animation-delay: 0.3s;
+}
+.weekly-floating-circle:nth-child(3) {
+    background: rgba(255,255,255,0.4);
+    animation-delay: 0.6s;
+}
+@keyframes float-weekly {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.2); }
+}
+.weekly-corner-bubble {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: pulse-weekly 4s ease-in-out infinite;
+}
+.weekly-bubble-1 {
+    width: 80px;
+    height: 80px;
+    background: white;
+    top: -20px;
+    right: -20px;
+    animation-delay: 0s;
+}
+.weekly-bubble-2 {
+    width: 50px;
+    height: 50px;
+    background: white;
+    bottom: -15px;
+    left: 10%;
+    animation-delay: 1s;
+}
+.weekly-bubble-3 {
+    width: 30px;
+    height: 30px;
+    background: white;
+    top: 20%;
+    right: 15%;
+    animation-delay: 2s;
+}
+@keyframes pulse-weekly {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.5; }
+}
+</style>
+<div class="weekly-header">
+<div class="weekly-corner-bubble weekly-bubble-1"></div>
+<div class="weekly-corner-bubble weekly-bubble-2"></div>
+<div class="weekly-corner-bubble weekly-bubble-3"></div>
+<div class="weekly-header-content">
+<div class="weekly-title-section">
+<span class="weekly-icon">📆</span>
+<div>
+<h1 class="weekly-title">Weekly Report</h1>
+<p class="weekly-subtitle">Week-by-week performance tracking</p>
+</div>
+</div>
+<div class="weekly-decoration">
+<div class="weekly-floating-circle"></div>
+<div class="weekly-floating-circle"></div>
+<div class="weekly-floating-circle"></div>
+</div>
+</div>
+</div>
+"""
+        st.markdown(header_html, unsafe_allow_html=True)
 
     def _render_period_selector(self) -> tuple:
         """Render period selector and return selected and previous periods."""
         available_weeks = self.report.get_available_weeks()
-        week_options = available_weeks["week_start"].dt.strftime("Week of %b %d, %Y").tolist()
+        week_options = available_weeks["week_start"].dt.strftime("%b %d, %Y").tolist()
         selected_idx = st.selectbox(
             "📆 Select Period",
             range(len(week_options)),

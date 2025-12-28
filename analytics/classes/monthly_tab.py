@@ -45,9 +45,146 @@ class MonthlyTab(BaseTab):
         self._render_content_tabs(selected_month, prev_month)
 
     def _render_header_section(self) -> None:
-        """Render the header section (placeholder for future container design)."""
-        st.markdown("# 📅 Monthly Report")
-        st.markdown("---")
+        """Render the animated header section with gradient and floating elements."""
+        header_html = """
+<style>
+.monthly-header {
+    position: relative;
+    background: linear-gradient(135deg, #3B82F6 0%, #F63B83 50%, #83F63B 100%);
+    border-radius: 16px;
+    padding: 30px 40px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(59, 130, 246, 0.3);
+}
+.monthly-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    animation: shimmer 3s infinite linear;
+}
+@keyframes shimmer {
+    0% { transform: translateX(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) rotate(45deg); }
+}
+.header-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.header-title-section {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+.header-icon {
+    font-size: 48px;
+    animation: bounce-icon 2s ease-in-out infinite;
+}
+@keyframes bounce-icon {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+.header-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    margin: 0;
+}
+.header-subtitle {
+    font-size: 14px;
+    color: rgba(255,255,255,0.9);
+    margin-top: 5px;
+}
+.header-decoration {
+    display: flex;
+    gap: 10px;
+}
+.floating-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: float-circle 2s ease-in-out infinite;
+}
+.floating-circle:nth-child(1) {
+    background: rgba(255,255,255,0.8);
+    animation-delay: 0s;
+}
+.floating-circle:nth-child(2) {
+    background: rgba(255,255,255,0.6);
+    animation-delay: 0.3s;
+}
+.floating-circle:nth-child(3) {
+    background: rgba(255,255,255,0.4);
+    animation-delay: 0.6s;
+}
+@keyframes float-circle {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.2); }
+}
+.corner-bubble {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: pulse-bubble 4s ease-in-out infinite;
+}
+.corner-bubble-1 {
+    width: 80px;
+    height: 80px;
+    background: white;
+    top: -20px;
+    right: -20px;
+    animation-delay: 0s;
+}
+.corner-bubble-2 {
+    width: 50px;
+    height: 50px;
+    background: white;
+    bottom: -15px;
+    left: 10%;
+    animation-delay: 1s;
+}
+.corner-bubble-3 {
+    width: 30px;
+    height: 30px;
+    background: white;
+    top: 20%;
+    right: 15%;
+    animation-delay: 2s;
+}
+@keyframes pulse-bubble {
+    0%, 100% { transform: scale(1); opacity: 0.3; }
+    50% { transform: scale(1.1); opacity: 0.5; }
+}
+</style>
+<div class="monthly-header">
+<div class="corner-bubble corner-bubble-1"></div>
+<div class="corner-bubble corner-bubble-2"></div>
+<div class="corner-bubble corner-bubble-3"></div>
+<div class="header-content">
+<div class="header-title-section">
+<span class="header-icon">📅</span>
+<div>
+<h1 class="header-title">Monthly Report</h1>
+<p class="header-subtitle">Comprehensive monthly analytics and insights</p>
+</div>
+</div>
+<div class="header-decoration">
+<div class="floating-circle"></div>
+<div class="floating-circle"></div>
+<div class="floating-circle"></div>
+</div>
+</div>
+</div>
+"""
+        st.markdown(header_html, unsafe_allow_html=True)
 
     def _render_period_selector(self) -> tuple:
         """Render period selector and return selected and previous periods."""
