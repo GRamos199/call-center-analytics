@@ -51,28 +51,15 @@ class WeeklyTab(BaseTab):
 
     def _render_period_selector(self) -> tuple:
         """Render period selector and return selected and previous periods."""
-        col1, col2, col3 = st.columns([2, 1, 1])
-        
-        with col1:
-            available_weeks = self.report.get_available_weeks()
-            week_options = available_weeks["week_start"].dt.strftime("Week of %b %d, %Y").tolist()
-            selected_idx = st.selectbox(
-                "📆 Select Period",
-                range(len(week_options)),
-                format_func=lambda x: week_options[x],
-                key="weekly_selector"
-            )
-            selected_week = available_weeks.iloc[selected_idx]["week_start"]
-        
-        with col2:
-            st.write("")
-            st.write("")
-            if st.button("🔄 Refresh Data", key="weekly_refresh", use_container_width=True):
-                self.report.refresh_data()
-                st.rerun()
-        
-        with col3:
-            st.write("")
+        available_weeks = self.report.get_available_weeks()
+        week_options = available_weeks["week_start"].dt.strftime("Week of %b %d, %Y").tolist()
+        selected_idx = st.selectbox(
+            "📆 Select Period",
+            range(len(week_options)),
+            format_func=lambda x: week_options[x],
+            key="weekly_selector"
+        )
+        selected_week = available_weeks.iloc[selected_idx]["week_start"]
         
         # Get previous week for comparison
         prev_week = self.report.get_previous_week(selected_week)

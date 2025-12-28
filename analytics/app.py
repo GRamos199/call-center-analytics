@@ -40,13 +40,6 @@ def render_sidebar():
         st.session_state.report_type = "Weekly Report"
     
     st.sidebar.markdown("---")
-    
-    # Data refresh option
-    if st.sidebar.button("Refresh All Data", use_container_width=True):
-        st.cache_data.clear()
-        st.rerun()
-    
-    st.sidebar.markdown("---")
     st.sidebar.subheader("About")
     st.sidebar.markdown("""
     **Call Center Analytics Dashboard**

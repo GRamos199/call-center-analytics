@@ -51,28 +51,15 @@ class MonthlyTab(BaseTab):
 
     def _render_period_selector(self) -> tuple:
         """Render period selector and return selected and previous periods."""
-        col1, col2, col3 = st.columns([2, 1, 1])
-        
-        with col1:
-            available_months = self.report.get_available_months()
-            month_options = available_months["month"].dt.strftime("%B %Y").tolist()
-            selected_idx = st.selectbox(
-                "📆 Select Period",
-                range(len(month_options)),
-                format_func=lambda x: month_options[x],
-                key="monthly_selector"
-            )
-            selected_month = available_months.iloc[selected_idx]["month"]
-        
-        with col2:
-            st.write("")
-            st.write("")
-            if st.button("🔄 Refresh Data", key="monthly_refresh", use_container_width=True):
-                self.report.refresh_data()
-                st.rerun()
-        
-        with col3:
-            st.write("")
+        available_months = self.report.get_available_months()
+        month_options = available_months["month"].dt.strftime("%B %Y").tolist()
+        selected_idx = st.selectbox(
+            "📆 Select Period",
+            range(len(month_options)),
+            format_func=lambda x: month_options[x],
+            key="monthly_selector"
+        )
+        selected_month = available_months.iloc[selected_idx]["month"]
         
         # Get previous month for comparison
         prev_month = self.report.get_previous_month(selected_month)
