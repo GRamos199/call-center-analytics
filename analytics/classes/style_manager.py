@@ -47,81 +47,183 @@ class StyleManager:
         """
         return f"""
         <style>
-        /* Reduce top padding and margins */
+        /* ========== MAIN LAYOUT ========== */
         .main {{
             padding-top: 0rem;
         }}
         
         [data-testid="stAppViewContainer"] {{
-            padding-top: 1rem;
+            padding-top: 0.5rem;
         }}
         
-        /* Sidebar styling */
+        /* Reduce block container padding */
+        .block-container {{
+            padding-top: 1rem !important;
+            padding-bottom: 1rem !important;
+        }}
+        
+        /* ========== SIDEBAR STYLING ========== */
         [data-testid="stSidebar"] {{
-            background-color: {cls.COLORS["background"]};
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%) !important;
+        }}
+        
+        [data-testid="stSidebar"] > div:first-child {{
+            padding-top: 0 !important;
         }}
         
         /* Sidebar text styling */
-        [data-testid="stSidebar"] .css-1d391kg {{
-            color: {cls.COLORS["text_dark"]};
+        [data-testid="stSidebar"] h1,
+        [data-testid="stSidebar"] h2,
+        [data-testid="stSidebar"] h3 {{
+            color: white !important;
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
         }}
         
-        [data-testid="stSidebar"] h2 {{
-            color: {cls.COLORS["text_dark"]};
+        [data-testid="stSidebar"] p,
+        [data-testid="stSidebar"] li,
+        [data-testid="stSidebar"] span {{
+            color: rgba(255, 255, 255, 0.85) !important;
         }}
         
-        [data-testid="stSidebar"] p {{
-            color: {cls.COLORS["text_dark"]};
+        [data-testid="stSidebar"] strong {{
+            color: {cls.COLORS["primary"]} !important;
         }}
         
-        /* Button styling - default state */
+        /* Sidebar divider */
+        [data-testid="stSidebar"] hr {{
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            margin: 1rem 0 !important;
+        }}
+        
+        /* ========== SIDEBAR BUTTONS ========== */
         [data-testid="stSidebar"] button {{
-            background-color: {cls.COLORS["white"]} !important;
-            color: {cls.COLORS["text_dark"]} !important;
-            border: 2px solid {cls.COLORS["primary"]} !important;
-            font-weight: 500 !important;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(246, 59, 131, 0.1) 100%) !important;
+            color: white !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            border-radius: 12px !important;
+            font-weight: 600 !important;
+            padding: 12px 20px !important;
+            margin-bottom: 8px !important;
+            transition: all 0.3s ease !important;
+            backdrop-filter: blur(10px) !important;
         }}
         
-        /* Button hover state */
         [data-testid="stSidebar"] button:hover {{
-            background-color: {cls.COLORS["primary_hover"]} !important;
-            color: {cls.COLORS["white"]} !important;
-            border: 2px solid {cls.COLORS["primary_hover"]} !important;
+            background: linear-gradient(135deg, {cls.COLORS["primary"]} 0%, {cls.COLORS["secondary"]} 100%) !important;
+            color: white !important;
+            border: 1px solid transparent !important;
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4) !important;
         }}
         
-        /* Button active/focus state - when selected */
         [data-testid="stSidebar"] button:active,
         [data-testid="stSidebar"] button:focus {{
-            background-color: {cls.COLORS["primary_hover"]} !important;
-            color: {cls.COLORS["white"]} !important;
-            border: 2px solid {cls.COLORS["primary_hover"]} !important;
+            background: linear-gradient(135deg, {cls.COLORS["primary"]} 0%, {cls.COLORS["secondary"]} 100%) !important;
+            color: white !important;
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4) !important;
         }}
         
-        /* Ensure text stays white on pressed/visited buttons */
-        [data-testid="stSidebar"] button:focus:not(:focus-visible) {{
-            background-color: {cls.COLORS["primary_hover"]} !important;
-            color: {cls.COLORS["white"]} !important;
-        }}
-        
-        /* Button text color override for all states */
         [data-testid="stSidebar"] button p,
-        [data-testid="stSidebar"] button span,
-        [data-testid="stSidebar"] button:hover p,
-        [data-testid="stSidebar"] button:hover span,
-        [data-testid="stSidebar"] button:active p,
-        [data-testid="stSidebar"] button:active span,
-        [data-testid="stSidebar"] button:focus p,
-        [data-testid="stSidebar"] button:focus span {{
-            color: inherit !important;
+        [data-testid="stSidebar"] button span {{
+            color: white !important;
         }}
         
-        /* Metric styling */
+        /* ========== SIDEBAR SELECTBOX ========== */
+        [data-testid="stSidebar"] [data-testid="stSelectbox"] {{
+            background: rgba(255, 255, 255, 0.05) !important;
+            border-radius: 10px !important;
+            padding: 5px !important;
+        }}
+        
+        [data-testid="stSidebar"] [data-testid="stSelectbox"] label {{
+            color: rgba(255, 255, 255, 0.9) !important;
+        }}
+        
+        /* ========== METRIC CARDS ========== */
         [data-testid="stMetricValue"] {{
-            font-size: 32px;
+            font-size: 28px !important;
+            font-weight: 700 !important;
         }}
         
         [data-testid="stMetricLabel"] {{
-            font-size: 16px;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+        }}
+        
+        [data-testid="stMetricDelta"] {{
+            font-size: 12px !important;
+        }}
+        
+        /* ========== TABS STYLING ========== */
+        .stTabs [data-baseweb="tab-list"] {{
+            gap: 8px;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.05), rgba(246, 59, 131, 0.05), rgba(131, 246, 59, 0.05));
+            border-radius: 12px;
+            padding: 8px;
+        }}
+        
+        .stTabs [data-baseweb="tab"] {{
+            border-radius: 10px !important;
+            padding: 10px 20px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }}
+        
+        .stTabs [data-baseweb="tab"]:hover {{
+            background: rgba(59, 130, 246, 0.1) !important;
+        }}
+        
+        .stTabs [aria-selected="true"] {{
+            background: linear-gradient(135deg, {cls.COLORS["primary"]}, {cls.COLORS["secondary"]}) !important;
+            color: white !important;
+        }}
+        
+        /* ========== CARDS & CONTAINERS ========== */
+        [data-testid="stExpander"] {{
+            border: 1px solid rgba(59, 130, 246, 0.2) !important;
+            border-radius: 12px !important;
+            background: rgba(59, 130, 246, 0.02) !important;
+        }}
+        
+        [data-testid="stExpander"]:hover {{
+            border-color: {cls.COLORS["primary"]} !important;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1) !important;
+        }}
+        
+        /* ========== DATAFRAMES ========== */
+        [data-testid="stDataFrame"] {{
+            border-radius: 12px !important;
+            overflow: hidden !important;
+        }}
+        
+        /* ========== SCROLLBAR ========== */
+        ::-webkit-scrollbar {{
+            width: 8px;
+            height: 8px;
+        }}
+        
+        ::-webkit-scrollbar-track {{
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 4px;
+        }}
+        
+        ::-webkit-scrollbar-thumb {{
+            background: linear-gradient(180deg, {cls.COLORS["primary"]}, {cls.COLORS["secondary"]});
+            border-radius: 4px;
+        }}
+        
+        ::-webkit-scrollbar-thumb:hover {{
+            background: linear-gradient(180deg, {cls.COLORS["secondary"]}, {cls.COLORS["accent"]});
+        }}
+        
+        /* ========== ANIMATIONS ========== */
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(10px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        
+        .element-container {{
+            animation: fadeIn 0.3s ease-out;
         }}
         </style>
         """

@@ -251,20 +251,21 @@ class WeeklyTab(BaseTab):
                 delta_color="inverse"
             )
         
-        # Second row of KPIs - Channel breakdown
+        # Second row of KPIs
         col1, col2, col3, col4 = st.columns(4)
         
         with col1:
-            st.metric("📞 Calls", f"{current_metrics.get('total_calls', 0):,}")
+            fcr = current_metrics.get("first_call_resolution_rate", 0) * 100
+            st.metric("First Call Resolution", f"{fcr:.1f}%")
         
         with col2:
-            st.metric("📧 Emails", f"{current_metrics.get('total_emails', 0):,}")
+            st.metric("Total Cost", f"${current_metrics.get('total_cost', 0):,.2f}")
         
         with col3:
-            st.metric("💬 Chats", f"{current_metrics.get('total_chats', 0):,}")
+            st.metric("Active Agents", f"{current_metrics.get('unique_agents', 0)}")
         
         with col4:
-            st.metric("📱 WhatsApp", f"{current_metrics.get('total_whatsapp', 0):,}")
+            st.metric("Interactions/Agent", f"{current_metrics.get('interactions_per_agent', 0):.0f}")
         
         st.markdown("---")
 
