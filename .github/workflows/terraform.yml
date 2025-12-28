@@ -78,13 +78,42 @@ jobs:
         run: terraform validate
 
   # ===========================================================================
+  # Check AWS Credentials
+  # ===========================================================================
+  check-secrets:
+    name: 🔐 Check AWS Credentials
+    runs-on: ubuntu-latest
+    needs: validate
+    outputs:
+      has-aws-credentials: ${{ steps.check.outputs.has-credentials }}
+
+    steps:
+      - name: 🔍 Check if AWS credentials are configured
+        id: check
+        env:
+          AWS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        run: |
+          if [ -n "$AWS_KEY" ]; then
+            echo "has-credentials=true" >> $GITHUB_OUTPUT
+            echo "✅ AWS credentials are configured"
+          else
+            echo "has-credentials=false" >> $GITHUB_OUTPUT
+            echo "⚠️ AWS credentials not configured - skipping AWS-dependent jobs"
+            echo "To enable full functionality, add these secrets to your repository:"
+            echo "  - AWS_ACCESS_KEY_ID"
+            echo "  - AWS_SECRET_ACCESS_KEY"
+          fi
+
+  # ===========================================================================
   # Terraform Plan
   # ===========================================================================
   plan:
     name: 📋 Plan
     runs-on: ubuntu-latest
-    needs: validate
-    if: github.event_name == 'pull_request' || github.event.inputs.action == 'plan' || github.event.inputs.action == ''
+    needs: check-secrets
+    if: |
+      needs.check-secrets.outputs.has-aws-credentials == 'true' &&
+      (github.event_name == 'pull_request' || github.event.inputs.action == 'plan' || github.event.inputs.action == '')
 
     steps:
       - name: 📥 Checkout code
@@ -116,15 +145,21 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           script: |
-            const fs = require('fs');
-            const plan = fs.readFileSync('terraform/tfplan', 'utf8');
+            const { execSync } = require('child_process');
+
+            let planOutput = '';
+            try {
+              planOutput = execSync('cd terraform && terraform show -no-color tfplan').toString();
+            } catch (e) {
+              planOutput = 'Plan output not available';
+            }
 
             const output = `#### Terraform Plan 📋
 
             <details><summary>Show Plan</summary>
 
             \`\`\`terraform
-            ${plan.substring(0, 65000)}
+            ${planOutput.substring(0, 65000)}
             \`\`\`
 
             </details>
@@ -145,13 +180,43 @@ jobs:
           path: terraform/tfplan
 
   # ===========================================================================
+  # Plan Skipped Notice
+  # ===========================================================================
+  plan-skipped:
+    name: 📋 Plan (Skipped - No AWS Credentials)
+    runs-on: ubuntu-latest
+    needs: check-secrets
+    if: needs.check-secrets.outputs.has-aws-credentials != 'true'
+
+    steps:
+      - name: ⚠️ AWS Credentials Required
+        run: |
+          echo "============================================="
+          echo "⚠️  TERRAFORM PLAN SKIPPED"
+          echo "============================================="
+          echo ""
+          echo "AWS credentials are not configured."
+          echo "Format and Validate checks passed successfully!"
+          echo ""
+          echo "To enable Terraform Plan/Apply, add these secrets:"
+          echo "  Repository → Settings → Secrets → Actions"
+          echo ""
+          echo "  • AWS_ACCESS_KEY_ID"
+          echo "  • AWS_SECRET_ACCESS_KEY"
+          echo ""
+          echo "============================================="
+
+  # ===========================================================================
   # Terraform Apply
   # ===========================================================================
   apply:
     name: 🚀 Apply
     runs-on: ubuntu-latest
-    needs: plan
-    if: github.ref == 'refs/heads/main' && github.event.inputs.action == 'apply'
+    needs: [check-secrets, plan]
+    if: |
+      needs.check-secrets.outputs.has-aws-credentials == 'true' &&
+      github.ref == 'refs/heads/main' &&
+      github.event.inputs.action == 'apply'
     environment: production
 
     steps:
@@ -194,8 +259,10 @@ jobs:
   destroy:
     name: 💥 Destroy
     runs-on: ubuntu-latest
-    needs: validate
-    if: github.event.inputs.action == 'destroy'
+    needs: check-secrets
+    if: |
+      needs.check-secrets.outputs.has-aws-credentials == 'true' &&
+      github.event.inputs.action == 'destroy'
     environment: production
 
     steps:
