@@ -30,17 +30,30 @@ class WelcomePage:
     box-sizing: border-box;
 }
 
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .welcome-wrapper {
     position: relative;
-    min-height: 800px;
+    min-height: 100vh;
+    width: 100%;
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 50%, #f0f2f5 100%);
-    overflow: hidden;
-    padding: 40px;
+    overflow: visible;
+    padding: 3vh 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
 }
 
 /* Floating bubbles */
@@ -174,13 +187,15 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 35px;
+    gap: 2.5vh;
+    width: 100%;
+    max-width: 1000px;
 }
 
 /* Hero section */
 .hero-section {
     text-align: center;
-    padding: 30px;
+    padding: 1vh 10px;
 }
 
 .hero-badge {
@@ -189,9 +204,9 @@ body {
     gap: 8px;
     background: linear-gradient(135deg, #3B82F620, #F63B8320);
     border: 1px solid #3B82F640;
-    padding: 8px 20px;
+    padding: 6px 16px;
     border-radius: 30px;
-    margin-bottom: 20px;
+    margin-bottom: 1.5vh;
     animation: pulse-badge 2s ease-in-out infinite;
 }
 
@@ -209,8 +224,8 @@ body {
 }
 
 .hero-icon {
-    font-size: 72px;
-    margin-bottom: 15px;
+    font-size: clamp(40px, 6vh, 60px);
+    margin-bottom: 1vh;
     display: block;
     animation: icon-bounce 3s ease-in-out infinite;
 }
@@ -222,32 +237,32 @@ body {
 }
 
 .hero-title {
-    font-size: 48px;
+    font-size: clamp(28px, 5vh, 42px);
     font-weight: 800;
     background: linear-gradient(135deg, #3B82F6 0%, #F63B83 50%, #83F63B 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 15px;
+    margin-bottom: 1vh;
 }
 
 .hero-subtitle {
-    font-size: 18px;
+    font-size: clamp(12px, 1.8vh, 16px);
     color: #666;
-    max-width: 550px;
+    max-width: 500px;
     margin: 0 auto;
-    line-height: 1.6;
+    line-height: 1.5;
 }
 
 /* Stats bar */
 .stats-bar {
     display: flex;
     justify-content: center;
-    gap: 50px;
-    padding: 25px 45px;
+    gap: clamp(20px, 4vw, 50px);
+    padding: clamp(12px, 2vh, 25px) clamp(25px, 4vw, 50px);
     background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(59, 130, 246, 0.1);
 }
 
@@ -256,7 +271,7 @@ body {
 }
 
 .stat-value {
-    font-size: 32px;
+    font-size: clamp(20px, 3.5vh, 32px);
     font-weight: 700;
     background: linear-gradient(135deg, #3B82F6, #F63B83);
     -webkit-background-clip: text;
@@ -265,9 +280,9 @@ body {
 }
 
 .stat-label {
-    font-size: 12px;
+    font-size: clamp(9px, 1.2vh, 12px);
     color: #888;
-    margin-top: 5px;
+    margin-top: 2px;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
@@ -275,20 +290,20 @@ body {
 /* Features grid */
 .features-section {
     width: 100%;
-    max-width: 950px;
+    max-width: 900px;
 }
 
 .features-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    gap: clamp(10px, 1.5vw, 20px);
 }
 
 .feature-card {
     position: relative;
     background: white;
-    border-radius: 16px;
-    padding: 25px 20px;
+    border-radius: 12px;
+    padding: clamp(12px, 2vh, 20px) clamp(10px, 1vw, 15px);
     text-align: center;
     transition: all 0.4s ease;
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
@@ -323,14 +338,14 @@ body {
 .feature-card.orange { --card-color: #F6B83B; }
 
 .feature-icon-wrapper {
-    width: 56px;
-    height: 56px;
-    margin: 0 auto 15px;
-    border-radius: 14px;
+    width: clamp(36px, 5vh, 52px);
+    height: clamp(36px, 5vh, 52px);
+    margin: 0 auto clamp(6px, 1vh, 12px);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 26px;
+    font-size: clamp(16px, 2.5vh, 24px);
     transition: transform 0.3s ease;
 }
 
@@ -344,24 +359,24 @@ body {
 .feature-card.orange .feature-icon-wrapper { background: linear-gradient(135deg, #F6B83B20, #F6B83B10); }
 
 .feature-title {
-    font-size: 14px;
+    font-size: clamp(11px, 1.5vh, 14px);
     font-weight: 700;
     color: #333;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .feature-desc {
-    font-size: 12px;
+    font-size: clamp(9px, 1.2vh, 12px);
     color: #888;
-    line-height: 1.5;
+    line-height: 1.3;
 }
 
 /* CTA section */
 .cta-section {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 18px 35px;
+    gap: 10px;
+    padding: clamp(10px, 1.5vh, 16px) clamp(20px, 3vw, 35px);
     background: white;
     border-radius: 50px;
     box-shadow: 0 5px 25px rgba(59, 130, 246, 0.15);
@@ -369,7 +384,7 @@ body {
 }
 
 .cta-icon {
-    font-size: 22px;
+    font-size: clamp(16px, 2.5vh, 22px);
     animation: point-left 1s ease-in-out infinite;
 }
 
@@ -380,7 +395,7 @@ body {
 
 .cta-text {
     color: #555;
-    font-size: 14px;
+    font-size: clamp(11px, 1.5vh, 14px);
 }
 
 .cta-highlight {
@@ -472,4 +487,19 @@ body {
 
     def render(self) -> None:
         """Render the welcome page."""
-        components.html(self.get_welcome_html(), height=850, scrolling=False)
+        # Use JavaScript to get actual viewport height and make it responsive
+        responsive_html = """
+        <script>
+            function setHeight() {
+                const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+                document.body.style.height = vh + 'px';
+                const wrapper = document.querySelector('.welcome-wrapper');
+                if (wrapper) {
+                    wrapper.style.minHeight = (vh - 20) + 'px';
+                }
+            }
+            setHeight();
+            window.addEventListener('resize', setHeight);
+        </script>
+        """ + self.get_welcome_html()
+        components.html(responsive_html, height=800, scrolling=False)
