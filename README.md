@@ -46,7 +46,7 @@ Call Center Analytics is a comprehensive dashboard that provides real-time insig
 
 | Welcome Page | Monthly Report |
 |:------------:|:--------------:|
-| ![Welcome](https://via.placeholder.com/400x250/1a1a2e/ffffff?text=Welcome+Page) | ![Monthly](https://via.placeholder.com/400x250/1a1a2e/ffffff?text=Monthly+Report) |
+| ![Welcome](./img/Welcome.png) | ![Monthly](./img/monthly.png) |
 
 </div>
 
