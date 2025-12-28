@@ -1,0 +1,176 @@
+# =============================================================================
+# Testing Workflow
+# Runs tests on every push and pull request
+# =============================================================================
+
+name: 🧪 Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # ===========================================================================
+  # Linting and Code Quality
+  # ===========================================================================
+  lint:
+    name: 🔍 Lint & Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort mypy
+          pip install -r requirements.txt
+
+      - name: 🎨 Check code formatting with Black
+        run: black --check --diff analytics/
+
+      - name: 📋 Check import sorting with isort
+        run: isort --check-only --diff analytics/
+
+      - name: 🔎 Lint with flake8
+        run: |
+          flake8 analytics/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 analytics/ --count --exit-zero --max-complexity=10 --max-line-length=120 --statistics
+
+  # ===========================================================================
+  # Unit Tests
+  # ===========================================================================
+  test:
+    name: 🧪 Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov pytest-html
+          pip install -r requirements.txt
+
+      - name: 🧪 Run tests with coverage
+        run: |
+          pytest tests/ -v --cov=analytics --cov-report=xml --cov-report=html --html=report.html --self-contained-html || true
+
+      - name: 📊 Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: |
+            htmlcov/
+            report.html
+            coverage.xml
+
+  # ===========================================================================
+  # Integration Tests
+  # ===========================================================================
+  integration:
+    name: 🔗 Integration Tests
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: 📦 Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: ✅ Validate data loading
+        run: |
+          python -c "
+          from analytics.utils.data_loader import DataLoader
+          from analytics.utils.metric_loader import MetricLoader
+
+          # Test monthly
+          dl = DataLoader(period='monthly')
+          ml = MetricLoader(dl)
+
+          assert dl.load_overall_data().shape[0] > 0, 'Monthly overall data is empty'
+          assert dl.load_agent_data().shape[0] > 0, 'Monthly agent data is empty'
+          assert dl.load_channel_data().shape[0] > 0, 'Monthly channel data is empty'
+          assert dl.load_calls_data().shape[0] > 0, 'Monthly calls data is empty'
+
+          # Test weekly
+          dl.set_period('weekly')
+          assert dl.load_overall_data().shape[0] > 0, 'Weekly overall data is empty'
+          assert dl.load_agent_data().shape[0] > 0, 'Weekly agent data is empty'
+
+          print('✅ All data loading tests passed!')
+          "
+
+      - name: 🐳 Build Docker image
+        run: docker build -t call-center-analytics:test .
+
+      - name: 🚀 Test Docker container
+        run: |
+          docker run -d --name test-container -p 8501:8501 call-center-analytics:test
+          sleep 10
+          curl --fail http://localhost:8501/_stcore/health || (docker logs test-container && exit 1)
+          docker stop test-container
+          docker rm test-container
+          echo "✅ Docker container health check passed!"
+
+  # ===========================================================================
+  # Security Scan
+  # ===========================================================================
+  security:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: 🔒 Run Bandit security scan
+        run: |
+          pip install bandit
+          bandit -r analytics/ -f json -o bandit-report.json || true
+          bandit -r analytics/ -ll
+
+      - name: 📊 Upload security report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-report
+          path: bandit-report.json

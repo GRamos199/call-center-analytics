@@ -1,0 +1,26 @@
+# =============================================================================
+# Example Terraform Variables
+# Copy this file to terraform.tfvars and customize values
+# =============================================================================
+
+# AWS Configuration
+aws_region   = "us-east-1"
+project_name = "call-center-analytics"
+environment  = "dev"
+
+# VPC Configuration
+vpc_cidr             = "10.0.0.0/16"
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.11.0/24"]
+
+# ECS Configuration
+container_port   = 8501
+container_cpu    = 256   # 0.25 vCPU
+container_memory = 512   # 512 MB
+desired_count    = 1
+min_capacity     = 1
+max_capacity     = 3
+
+# Application Configuration
+health_check_path = "/_stcore/health"
+docker_image_tag  = "latest"
