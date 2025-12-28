@@ -42,7 +42,7 @@ jobs:
         run: black --check --diff analytics/
 
       - name: 📋 Check import sorting with isort
-        run: isort --check-only --diff analytics/
+        run: isort --check-only --diff --profile black analytics/
 
       - name: 🔎 Lint with flake8
         run: |
