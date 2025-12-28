@@ -146,12 +146,18 @@ class CallsContent(BaseContent):
         
         fig.update_layout(
             hovermode="x unified",
-            plot_bgcolor=self.COLORS["light_bg"],
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             xaxis_title="Month",
             yaxis_title="Total Calls",
             height=400,
             margin=dict(t=50, b=50),
-            xaxis=dict(categoryorder='array', categoryarray=monthly_calls["month_name"].tolist())
+            xaxis=dict(
+                categoryorder='array',
+                categoryarray=monthly_calls["month_name"].tolist(),
+                showgrid=False
+            ),
+            yaxis=dict(showgrid=False)
         )
         
         st.plotly_chart(fig, use_container_width=True)
@@ -182,12 +188,18 @@ class CallsContent(BaseContent):
         
         fig.update_layout(
             hovermode="x unified",
-            plot_bgcolor=self.COLORS["light_bg"],
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             xaxis_title="Month",
             yaxis_title="Resolution Rate (%)",
             height=400,
             margin=dict(t=50, b=50),
-            xaxis=dict(categoryorder='array', categoryarray=monthly_rt["month_name"].tolist())
+            xaxis=dict(
+                categoryorder='array',
+                categoryarray=monthly_rt["month_name"].tolist(),
+                showgrid=False
+            ),
+            yaxis=dict(showgrid=False)
         )
         
         st.plotly_chart(fig, use_container_width=True)
@@ -228,12 +240,18 @@ class CallsContent(BaseContent):
         
         fig.update_layout(
             hovermode="x unified",
-            plot_bgcolor=self.COLORS["light_bg"],
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             xaxis_title="Month",
             yaxis_title="Avg Duration (Hours)",
             height=350,
             margin=dict(t=50, b=50),
-            xaxis=dict(categoryorder='array', categoryarray=monthly_duration["month_name"].tolist())
+            xaxis=dict(
+                categoryorder='array',
+                categoryarray=monthly_duration["month_name"].tolist(),
+                showgrid=False
+            ),
+            yaxis=dict(showgrid=False)
         )
         
         st.plotly_chart(fig, use_container_width=True)
@@ -268,7 +286,9 @@ class CallsContent(BaseContent):
             height=350,
             margin=dict(t=50, b=50),
             showlegend=True,
-            legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5)
+            legend=dict(orientation="h", yanchor="bottom", y=-0.1, xanchor="center", x=0.5),
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)"
         )
         
         st.plotly_chart(fig, use_container_width=True)

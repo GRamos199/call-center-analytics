@@ -49,12 +49,18 @@ class OverallContent(BaseContent):
         
         fig.update_layout(
             hovermode="x unified",
-            plot_bgcolor=self.COLORS["light_bg"],
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             xaxis_title="Period",
             yaxis_title="Total Interactions",
             height=400,
             margin=dict(t=50, b=50),
-            xaxis=dict(categoryorder='array', categoryarray=trend_data[period_col].tolist())
+            xaxis=dict(
+                categoryorder='array',
+                categoryarray=trend_data[period_col].tolist(),
+                showgrid=False
+            ),
+            yaxis=dict(showgrid=False)
         )
         
         st.plotly_chart(fig, use_container_width=True)
@@ -118,7 +124,8 @@ class OverallContent(BaseContent):
         fig.update_layout(
             title="📈 AHT & First Call Resolution Rate Trend",
             hovermode="x unified",
-            plot_bgcolor=self.COLORS["light_bg"],
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             height=400,
             margin=dict(t=50, b=50),
             legend=dict(
@@ -131,12 +138,14 @@ class OverallContent(BaseContent):
             xaxis=dict(
                 title="Period",
                 categoryorder='array',
-                categoryarray=merged_data[period_col].tolist()
+                categoryarray=merged_data[period_col].tolist(),
+                showgrid=False
             ),
             yaxis=dict(
                 title=dict(text="AHT (minutes)", font=dict(color=self.COLORS["primary"])),
                 tickfont=dict(color=self.COLORS["primary"]),
-                side="left"
+                side="left",
+                showgrid=False
             ),
             yaxis2=dict(
                 title=dict(text="FCR Rate (%)", font=dict(color=self.COLORS["success"])),
@@ -144,7 +153,8 @@ class OverallContent(BaseContent):
                 anchor="x",
                 overlaying="y",
                 side="right",
-                range=[0, 100]
+                range=[0, 100],
+                showgrid=False
             )
         )
         
@@ -210,7 +220,8 @@ class OverallContent(BaseContent):
         fig.update_layout(
             title="💰 Cost Analysis",
             hovermode="x unified",
-            plot_bgcolor=self.COLORS["light_bg"],
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             height=350,
             margin=dict(t=50, b=50),
             legend=dict(
@@ -223,17 +234,20 @@ class OverallContent(BaseContent):
             xaxis=dict(
                 title="Period",
                 categoryorder='array',
-                categoryarray=merged_data[period_col].tolist()
+                categoryarray=merged_data[period_col].tolist(),
+                showgrid=False
             ),
             yaxis=dict(
                 title=dict(text="Total Cost ($)", font=dict(color=self.COLORS["secondary"])),
-                side="left"
+                side="left",
+                showgrid=False
             ),
             yaxis2=dict(
                 title=dict(text="Cost/Interaction ($)", font=dict(color=self.COLORS["warning"])),
                 anchor="x",
                 overlaying="y",
-                side="right"
+                side="right",
+                showgrid=False
             )
         )
         
@@ -278,18 +292,21 @@ class OverallContent(BaseContent):
         fig.update_layout(
             title="😊 Customer Satisfaction (CSAT)",
             hovermode="x unified",
-            plot_bgcolor=self.COLORS["light_bg"],
+            plot_bgcolor="rgba(0,0,0,0)",
+            paper_bgcolor="rgba(0,0,0,0)",
             height=350,
             margin=dict(t=50, b=50),
             xaxis=dict(
                 title="Period",
                 categoryorder='array',
-                categoryarray=csat_data[period_col].tolist()
+                categoryarray=csat_data[period_col].tolist(),
+                showgrid=False
             ),
             yaxis=dict(
                 title="CSAT Score",
                 range=[1, 5],
-                dtick=0.5
+                dtick=0.5,
+                showgrid=False
             )
         )
         
