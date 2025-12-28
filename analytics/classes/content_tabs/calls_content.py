@@ -31,6 +31,12 @@ class CallsContent(BaseContent):
 
     def render(self, selected_period: Any, previous_period: Any = None) -> None:
         """Render the calls performance content."""
+        self._render_tab_header(
+            "📞", 
+            "Calls Performance", 
+            "Call analytics, resolution rates and duration trends",
+            self.COLORS["success"]
+        )
         try:
             # Load all calls data
             calls_df = self.report.data_loader.load_calls_data()

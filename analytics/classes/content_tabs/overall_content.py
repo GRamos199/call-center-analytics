@@ -16,6 +16,12 @@ class OverallContent(BaseContent):
 
     def render(self, selected_period: Any, previous_period: Any = None) -> None:
         """Render the overall performance content."""
+        self._render_tab_header(
+            "📊", 
+            "Overall Performance", 
+            "Key metrics, trends and performance indicators",
+            self.COLORS["primary"]
+        )
         self._render_interactions_chart()
         self._render_aht_fcr_chart()
         self._render_cost_csat_charts()

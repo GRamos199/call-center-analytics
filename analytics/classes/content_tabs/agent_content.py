@@ -29,6 +29,12 @@ class AgentContent(BaseContent):
 
     def render(self, selected_period: Any, previous_period: Any = None) -> None:
         """Render the agent performance content."""
+        self._render_tab_header(
+            "👥", 
+            "Agent Performance", 
+            "Individual agent metrics and efficiency rankings",
+            self.COLORS["warning"]
+        )
         try:
             # Load all agent data
             agent_df = self.report.data_loader.load_agent_data()

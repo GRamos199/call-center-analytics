@@ -32,6 +32,12 @@ class ChannelContent(BaseContent):
 
     def render(self, selected_period: Any, previous_period: Any = None) -> None:
         """Render the channel performance content."""
+        self._render_tab_header(
+            "📡", 
+            "Channel Performance", 
+            "Performance breakdown by communication channel",
+            self.COLORS["secondary"]
+        )
         try:
             channel_df = self.report.get_channel_metrics(selected_period)
             

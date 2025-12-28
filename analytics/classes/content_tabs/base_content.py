@@ -78,3 +78,110 @@ class BaseContent(ABC):
         if decimals == 0:
             return f"{int(value):,}"
         return f"{value:,.{decimals}f}"
+
+    def _render_tab_header(self, icon: str, title: str, subtitle: str, color: str) -> None:
+        """Render an animated tab header matching main header style."""
+        period_label = "Monthly" if self.period_type == "monthly" else "Weekly"
+        # Use secondary color for gradient end
+        color2 = self.COLORS["secondary"] if color != self.COLORS["secondary"] else self.COLORS["primary"]
+        header_html = f"""
+<style>
+.tab-header-{title.replace(' ', '-').lower()} {{
+    position: relative;
+    background: linear-gradient(135deg, {color} 0%, {color2} 100%);
+    border-radius: 10px;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px {color}40;
+}}
+.tab-header-{title.replace(' ', '-').lower()}::before {{
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%);
+    animation: tab-shimmer-{title.replace(' ', '-').lower()} 3s infinite linear;
+}}
+@keyframes tab-shimmer-{title.replace(' ', '-').lower()} {{
+    0% {{ transform: translateX(-100%) rotate(45deg); }}
+    100% {{ transform: translateX(100%) rotate(45deg); }}
+}}
+.tab-header-content-{title.replace(' ', '-').lower()} {{
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}}
+.tab-icon-{title.replace(' ', '-').lower()} {{
+    font-size: 24px;
+    animation: bounce-tab-{title.replace(' ', '-').lower()} 2s ease-in-out infinite;
+}}
+@keyframes bounce-tab-{title.replace(' ', '-').lower()} {{
+    0%, 100% {{ transform: translateY(0); }}
+    50% {{ transform: translateY(-3px); }}
+}}
+.tab-title-{title.replace(' ', '-').lower()} {{
+    font-size: 16px;
+    font-weight: 700;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    margin: 0;
+}}
+.tab-subtitle-{title.replace(' ', '-').lower()} {{
+    font-size: 11px;
+    color: rgba(255,255,255,0.85);
+    margin-top: 2px;
+}}
+.tab-dots-{title.replace(' ', '-').lower()} {{
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}}
+.tab-dot-{title.replace(' ', '-').lower()} {{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    animation: float-dot-{title.replace(' ', '-').lower()} 1.5s ease-in-out infinite;
+}}
+.tab-dot-{title.replace(' ', '-').lower()}:nth-child(2) {{ animation-delay: 0.2s; }}
+.tab-dot-{title.replace(' ', '-').lower()}:nth-child(3) {{ animation-delay: 0.4s; }}
+@keyframes float-dot-{title.replace(' ', '-').lower()} {{
+    0%, 100% {{ transform: translateY(0); opacity: 0.6; }}
+    50% {{ transform: translateY(-4px); opacity: 1; }}
+}}
+.tab-bubble-{title.replace(' ', '-').lower()} {{
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    animation: pulse-tab-{title.replace(' ', '-').lower()} 3s ease-in-out infinite;
+}}
+.tab-bubble-1-{title.replace(' ', '-').lower()} {{ width: 40px; height: 40px; top: -15px; right: -10px; }}
+.tab-bubble-2-{title.replace(' ', '-').lower()} {{ width: 25px; height: 25px; bottom: -10px; right: 15%; animation-delay: 1s; }}
+@keyframes pulse-tab-{title.replace(' ', '-').lower()} {{
+    0%, 100% {{ transform: scale(1); opacity: 0.2; }}
+    50% {{ transform: scale(1.1); opacity: 0.35; }}
+}}
+</style>
+<div class="tab-header-{title.replace(' ', '-').lower()}">
+<div class="tab-bubble-{title.replace(' ', '-').lower()} tab-bubble-1-{title.replace(' ', '-').lower()}"></div>
+<div class="tab-bubble-{title.replace(' ', '-').lower()} tab-bubble-2-{title.replace(' ', '-').lower()}"></div>
+<div class="tab-header-content-{title.replace(' ', '-').lower()}">
+<span class="tab-icon-{title.replace(' ', '-').lower()}">{icon}</span>
+<div>
+<h3 class="tab-title-{title.replace(' ', '-').lower()}">{period_label} {title}</h3>
+<p class="tab-subtitle-{title.replace(' ', '-').lower()}">{subtitle}</p>
+</div>
+<div class="tab-dots-{title.replace(' ', '-').lower()}">
+<div class="tab-dot-{title.replace(' ', '-').lower()}"></div>
+<div class="tab-dot-{title.replace(' ', '-').lower()}"></div>
+<div class="tab-dot-{title.replace(' ', '-').lower()}"></div>
+</div>
+</div>
+</div>
+"""
+        st.markdown(header_html, unsafe_allow_html=True)
