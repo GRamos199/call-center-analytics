@@ -9,7 +9,7 @@
 
 **A modern, interactive Streamlit dashboard for call center performance analytics**
 
-[Live Preview](https://gramos199.github.io/call-center-analytics/) • [Documentation](#documentation) • [Getting Started](#getting-started)
+[Live Preview](https://gramos199.github.io/call-center-analytics/)
 
 <img src="https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
 <img src="https://img.shields.io/badge/Streamlit-1.40-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white" alt="Streamlit">
