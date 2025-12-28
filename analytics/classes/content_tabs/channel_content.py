@@ -24,10 +24,10 @@ class ChannelContent(BaseContent):
 
     # Channel colors mapping
     CHANNEL_COLORS = {
-        "Phone": "#3498db",
-        "Email": "#e74c3c",
-        "Chat": "#2ecc71",
-        "WhatsApp": "#25D366"
+        "Phone": "#3B82F6",
+        "Email": "#F63B83",
+        "Chat": "#83F63B",
+        "WhatsApp": "#F6B83B"
     }
 
     def render(self, selected_period: Any, previous_period: Any = None) -> None:

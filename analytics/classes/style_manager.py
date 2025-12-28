@@ -8,9 +8,11 @@ import streamlit as st
 class StyleManager:
     """Manages all styling and theming for the dashboard."""
 
-    # Color scheme
+    # Color scheme - Main project colors
     COLORS = {
-        "primary": "#3b82f6",
+        "primary": "#3B82F6",      # Blue
+        "secondary": "#F63B83",    # Pink/Magenta
+        "accent": "#83F63B",       # Green/Lime
         "primary_hover": "#2563eb",
         "background": "#F2F2F2",
         "text_dark": "#333333",

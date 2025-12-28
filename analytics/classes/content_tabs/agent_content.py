@@ -209,7 +209,7 @@ class AgentContent(BaseContent):
                 most_efficient["agent_name"],
                 most_efficient["department"],
                 f"${most_efficient['cost_per_interaction']:.2f}/interaction",
-                "#28a745"
+                "#83F63B"
             )
         
         with col2:
@@ -218,7 +218,7 @@ class AgentContent(BaseContent):
                 most_hours["agent_name"],
                 most_hours["department"],
                 f"{most_hours['hours_worked']:.1f} hours",
-                "#17a2b8"
+                "#3B82F6"
             )
         
         col3, col4 = st.columns(2)
@@ -229,7 +229,7 @@ class AgentContent(BaseContent):
                 most_interactions["agent_name"],
                 most_interactions["department"],
                 f"{int(most_interactions['total_interactions']):,} interactions",
-                "#6f42c1"
+                "#F63B83"
             )
         
         with col4:
@@ -238,7 +238,7 @@ class AgentContent(BaseContent):
                 best_csat["agent_name"],
                 best_csat["department"],
                 f"{best_csat['customer_satisfaction_score']:.2f}/5",
-                "#fd7e14"
+                "#F6B83B"
             )
 
     def _render_ranking_card(self, title: str, agent_name: str, department: str, value: str, color: str) -> None:

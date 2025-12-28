@@ -51,7 +51,7 @@ class OverallContent(BaseContent):
             hovermode="x unified",
             plot_bgcolor="rgba(0,0,0,0)",
             paper_bgcolor="rgba(0,0,0,0)",
-            xaxis_title="Period",
+            # xaxis_title="Period",
             yaxis_title="Total Interactions",
             height=400,
             margin=dict(t=50, b=50),
@@ -136,7 +136,7 @@ class OverallContent(BaseContent):
                 x=1
             ),
             xaxis=dict(
-                title="Period",
+                # title="Period",
                 categoryorder='array',
                 categoryarray=merged_data[period_col].tolist(),
                 showgrid=False
@@ -232,7 +232,7 @@ class OverallContent(BaseContent):
                 x=1
             ),
             xaxis=dict(
-                title="Period",
+                # title="Period",
                 categoryorder='array',
                 categoryarray=merged_data[period_col].tolist(),
                 showgrid=False
@@ -297,7 +297,7 @@ class OverallContent(BaseContent):
             height=350,
             margin=dict(t=50, b=50),
             xaxis=dict(
-                title="Period",
+                # title="Period",
                 categoryorder='array',
                 categoryarray=csat_data[period_col].tolist(),
                 showgrid=False

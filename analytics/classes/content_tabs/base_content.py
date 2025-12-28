@@ -10,32 +10,31 @@ import pandas as pd
 class BaseContent(ABC):
     """Base class for content sections within main tabs."""
 
-    # Color scheme
+    # Color scheme - Main project colors
     COLORS = {
-        "primary": "#FF6B6B",
-        "secondary": "#4ECDC4",
-        "success": "#95E1D3",
-        "warning": "#FFD93D",
-        "danger": "#FF6B6B",
-        "info": "#6C5CE7",
+        "primary": "#3B82F6",      # Blue
+        "secondary": "#F63B83",    # Pink/Magenta
+        "success": "#83F63B",      # Green/Lime
+        "warning": "#F6B83B",      # Orange (derived)
+        "danger": "#F63B3B",       # Red (derived)
+        "info": "#3BF6F6",         # Cyan (derived)
         "light_bg": "#F8F9FA",
         "dark_text": "#2D3436",
         "light_text": "#636E72",
     }
 
-    # Chart color palette
+    # Chart color palette - based on 3 main colors
     CHART_COLORS = {
         "palette": [
-            "#FF6B6B",
-            "#4ECDC4",
-            "#45B7D1",
-            "#96CEB4",
-            "#FFEAA7",
-            "#DDA15E",
-            "#BC6C25",
+            "#3B82F6",  # Blue
+            "#F63B83",  # Pink/Magenta
+            "#83F63B",  # Green/Lime
+            "#F6B83B",  # Orange (derived)
+            "#3BF6F6",  # Cyan (derived)
+            "#B83BF6",  # Purple (derived)
         ],
-        "gradient_start": "#FF6B6B",
-        "gradient_end": "#4ECDC4",
+        "gradient_start": "#3B82F6",
+        "gradient_end": "#83F63B",
     }
 
     def __init__(self, report: Any, period_type: Literal["monthly", "weekly"]):

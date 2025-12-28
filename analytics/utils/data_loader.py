@@ -178,15 +178,18 @@ class DataLoader:
     def get_periods(self) -> pd.DataFrame:
         """
         Get available periods (months or weeks) from overall data.
+        Sorted from most recent to oldest.
         
         Returns:
             DataFrame with period information
         """
         overall_df = self.load_overall_data()
         if self.period == "monthly":
-            return overall_df[["month", "month_name"]].copy()
+            result = overall_df[["month", "month_name"]].copy()
+            return result.sort_values("month", ascending=False).reset_index(drop=True)
         else:
-            return overall_df[["week_start"]].copy()
+            result = overall_df[["week_start"]].copy()
+            return result.sort_values("week_start", ascending=False).reset_index(drop=True)
 
     @staticmethod
     def validate_data_integrity(df: pd.DataFrame, data_type: str) -> bool:
