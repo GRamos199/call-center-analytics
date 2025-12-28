@@ -2,8 +2,10 @@
 Base tab class module.
 Defines the structure and styling for dashboard tabs.
 """
+
 from abc import ABC, abstractmethod
-from typing import Dict, Any
+from typing import Any, Dict
+
 import streamlit as st
 
 
@@ -41,7 +43,7 @@ class BaseTab(ABC):
     def __init__(self, title: str, icon: str = "📊"):
         """
         Initialize BaseTab.
-        
+
         Args:
             title: Tab title
             icon: Tab icon
@@ -69,7 +71,7 @@ class BaseTab(ABC):
     ) -> None:
         """
         Render a metric card.
-        
+
         Args:
             label: Metric label
             value: Metric value
@@ -78,29 +80,32 @@ class BaseTab(ABC):
             format_string: Format string for value
         """
         col1, col2 = st.columns([3, 1])
-        
+
         with col1:
             formatted_value = self._format_value(value, format_string)
             st.metric(label, formatted_value, delta=delta)
-        
+
         with col2:
-            st.markdown(f"<div style='font-size: 2em; text-align: center;'>{icon}</div>", unsafe_allow_html=True)
+            st.markdown(
+                f"<div style='font-size: 2em; text-align: center;'>{icon}</div>",
+                unsafe_allow_html=True,
+            )
 
     @staticmethod
     def _format_value(value: Any, format_string: str = None) -> str:
         """
         Format a value for display.
-        
+
         Args:
             value: Value to format
             format_string: Format string (e.g., '.2f' for currency)
-            
+
         Returns:
             Formatted value
         """
         if format_string is None:
             return str(value)
-        
+
         if isinstance(value, (int, float)):
             if format_string == "currency":
                 return f"${value:,.2f}"
@@ -110,7 +115,7 @@ class BaseTab(ABC):
                 return f"{value:.1f}h"
             else:
                 return format(value, format_string)
-        
+
         return str(value)
 
     def render_divider(self) -> None:

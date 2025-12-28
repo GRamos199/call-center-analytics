@@ -13,14 +13,14 @@ class IconsService:
     COST_PER_CLIENT = "💵"
     PRODUCTIVITY = "⚡"
     HOURS_WORKED = "⏱️"
-    
+
     # Call Center Icons
     CALL_CENTER = "☎️"
     AGENT = "👤"
     AGENTS = "👥"
     CLIENT = "🧑‍💼"
     PHONE = "📱"
-    
+
     # Analytics Icons
     CHART = "📊"
     TREND_UP = "📈"
@@ -28,19 +28,19 @@ class IconsService:
     PERCENTAGE = "%"
     AVERAGE = "≈"
     TOTAL = "∑"
-    
+
     # Time Icons
     CALENDAR = "📅"
     WEEK = "📆"
     MONTH = "📅"
     TIME = "🕐"
-    
+
     # Status Icons
     SUCCESS = "✅"
     WARNING = "⚠️"
     ERROR = "❌"
     INFO = "ℹ️"
-    
+
     # Navigation Icons
     DASHBOARD = "🏠"
     SETTINGS = "⚙️"
@@ -52,10 +52,10 @@ class IconsService:
     def get_metric_icon(metric_name: str) -> str:
         """
         Get icon for a given metric name.
-        
+
         Args:
             metric_name: Name of the metric (lowercase with underscores)
-            
+
         Returns:
             Icon string
         """
@@ -73,10 +73,10 @@ class IconsService:
     def get_status_icon(status: str) -> str:
         """
         Get icon for a given status.
-        
+
         Args:
             status: Status type (success, warning, error, info)
-            
+
         Returns:
             Icon string
         """

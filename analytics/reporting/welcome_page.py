@@ -2,6 +2,7 @@
 Welcome Page Module
 Displays an animated welcome screen with modern design and dashboard introduction.
 """
+
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -10,11 +11,7 @@ class WelcomePage:
     """Renders the welcome page with animated elements."""
 
     # Main colors
-    COLORS = {
-        "primary": "#3B82F6",
-        "secondary": "#F63B83", 
-        "accent": "#83F63B"
-    }
+    COLORS = {"primary": "#3B82F6", "secondary": "#F63B83", "accent": "#83F63B"}
 
     @staticmethod
     def get_welcome_html() -> str:
@@ -488,7 +485,8 @@ body {
     def render(self) -> None:
         """Render the welcome page."""
         # Use JavaScript to get actual viewport height and make it responsive
-        responsive_html = """
+        responsive_html = (
+            """
         <script>
             function setHeight() {
                 const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
@@ -501,5 +499,7 @@ body {
             setHeight();
             window.addEventListener('resize', setHeight);
         </script>
-        """ + self.get_welcome_html()
+        """
+            + self.get_welcome_html()
+        )
         components.html(responsive_html, height=800, scrolling=False)

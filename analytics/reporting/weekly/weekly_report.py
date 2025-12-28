@@ -2,9 +2,11 @@
 Weekly Report Logic Module
 Contains all data processing and metrics calculation for weekly reports.
 """
-from datetime import datetime, timedelta
+
 import sys
+from datetime import datetime, timedelta
 from pathlib import Path
+
 import pandas as pd
 
 # Add parent directory to path for imports

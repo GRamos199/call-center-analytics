@@ -2,17 +2,19 @@
 Call Center Analytics Dashboard
 Main application entry point for the Streamlit dashboard.
 """
-import streamlit as st
-from pathlib import Path
+
 import sys
+from pathlib import Path
+
+import streamlit as st
 
 # Add analytics folder to path for imports
 analytics_dir = Path(__file__).parent
 sys.path.insert(0, str(analytics_dir))
 
 from classes.monthly_tab import MonthlyTab
-from classes.weekly_tab import WeeklyTab
 from classes.style_manager import StyleManager
+from classes.weekly_tab import WeeklyTab
 from reporting.welcome_page import WelcomePage
 
 
@@ -134,14 +136,14 @@ def render_sidebar():
     with st.sidebar:
         # Animated header
         render_sidebar_header()
-        
+
         # Navigation section
         render_nav_section()
-        
+
         # Initialize session state for report selection
         if "report_type" not in st.session_state:
             st.session_state.report_type = "Welcome"
-        
+
         # Create buttons stacked vertically
         if st.button(
             "🏠 Home",
@@ -149,23 +151,23 @@ def render_sidebar():
             use_container_width=True,
         ):
             st.session_state.report_type = "Welcome"
-        
+
         if st.button(
             "📅 Monthly Report",
             key="btn_monthly",
             use_container_width=True,
         ):
             st.session_state.report_type = "Monthly Report"
-        
+
         if st.button(
             "📆 Weekly Report",
             key="btn_weekly",
             use_container_width=True,
         ):
             st.session_state.report_type = "Weekly Report"
-        
+
         st.markdown("<div style='height: 20px;'></div>", unsafe_allow_html=True)
-        
+
         # About section with styled header
         about_label = """
 <div style="
@@ -183,7 +185,7 @@ def render_sidebar():
 </div>
 """
         st.markdown(about_label, unsafe_allow_html=True)
-        
+
         # About content with styled container
         about_content = """
 <div style="
@@ -219,7 +221,7 @@ def render_sidebar():
 </div>
 """
         st.markdown(about_content, unsafe_allow_html=True)
-    
+
     return st.session_state.report_type
 
 

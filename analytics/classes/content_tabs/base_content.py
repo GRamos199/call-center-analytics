@@ -1,10 +1,12 @@
 """
 Base content class for dashboard tab sections.
 """
+
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Literal
-import streamlit as st
+
 import pandas as pd
+import streamlit as st
 
 
 class BaseContent(ABC):
@@ -12,12 +14,12 @@ class BaseContent(ABC):
 
     # Color scheme - Main project colors
     COLORS = {
-        "primary": "#3B82F6",      # Blue
-        "secondary": "#F63B83",    # Pink/Magenta
-        "success": "#83F63B",      # Green/Lime
-        "warning": "#F6B83B",      # Orange (derived)
-        "danger": "#F63B3B",       # Red (derived)
-        "info": "#3BF6F6",         # Cyan (derived)
+        "primary": "#3B82F6",  # Blue
+        "secondary": "#F63B83",  # Pink/Magenta
+        "success": "#83F63B",  # Green/Lime
+        "warning": "#F6B83B",  # Orange (derived)
+        "danger": "#F63B3B",  # Red (derived)
+        "info": "#3BF6F6",  # Cyan (derived)
         "light_bg": "#F8F9FA",
         "dark_text": "#2D3436",
         "light_text": "#636E72",
@@ -40,7 +42,7 @@ class BaseContent(ABC):
     def __init__(self, report: Any, period_type: Literal["monthly", "weekly"]):
         """
         Initialize BaseContent.
-        
+
         Args:
             report: The report instance (MonthlyReport or WeeklyReport)
             period_type: Either "monthly" or "weekly"
@@ -52,7 +54,7 @@ class BaseContent(ABC):
     def render(self, selected_period: Any, previous_period: Any = None) -> None:
         """
         Render the content section.
-        
+
         Args:
             selected_period: The currently selected period date
             previous_period: The previous period for comparison (optional)
@@ -79,11 +81,17 @@ class BaseContent(ABC):
             return f"{int(value):,}"
         return f"{value:,.{decimals}f}"
 
-    def _render_tab_header(self, icon: str, title: str, subtitle: str, color: str) -> None:
+    def _render_tab_header(
+        self, icon: str, title: str, subtitle: str, color: str
+    ) -> None:
         """Render an animated tab header matching main header style."""
         period_label = "Monthly" if self.period_type == "monthly" else "Weekly"
         # Use secondary color for gradient end
-        color2 = self.COLORS["secondary"] if color != self.COLORS["secondary"] else self.COLORS["primary"]
+        color2 = (
+            self.COLORS["secondary"]
+            if color != self.COLORS["secondary"]
+            else self.COLORS["primary"]
+        )
         header_html = f"""
 <style>
 .tab-header-{title.replace(' ', '-').lower()} {{

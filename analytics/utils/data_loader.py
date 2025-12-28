@@ -2,21 +2,24 @@
 Data loader module.
 Handles loading and initial processing of call center operational data.
 """
+
 import os
 from pathlib import Path
-from typing import Optional, Literal
+from typing import Literal, Optional
 
-import pandas as pd
 import duckdb
+import pandas as pd
 
 
 class DataLoader:
     """Handles loading and caching of call center data."""
 
-    def __init__(self, data_dir: str = None, period: Literal["monthly", "weekly"] = "monthly"):
+    def __init__(
+        self, data_dir: str = None, period: Literal["monthly", "weekly"] = "monthly"
+    ):
         """
         Initialize DataLoader.
-        
+
         Args:
             data_dir: Path to the data directory containing CSV files.
                      If None, uses the data directory in the same location as this file.
@@ -27,7 +30,7 @@ class DataLoader:
             base_dir = Path(__file__).parent.parent / "data"
         else:
             base_dir = Path(data_dir)
-        
+
         self.period = period
         self.data_dir = base_dir / period
         self._cache = {}
@@ -35,7 +38,7 @@ class DataLoader:
     def set_period(self, period: Literal["monthly", "weekly"]) -> None:
         """
         Change the period and update data directory.
-        
+
         Args:
             period: The period type ("monthly" or "weekly")
         """
@@ -47,10 +50,10 @@ class DataLoader:
     def load_overall_data(self, force_reload: bool = False) -> pd.DataFrame:
         """
         Load overall metrics data.
-        
+
         Args:
             force_reload: Force reload from disk, ignoring cache
-            
+
         Returns:
             DataFrame with overall metrics
         """
@@ -63,23 +66,23 @@ class DataLoader:
             raise FileNotFoundError(f"Overall data file not found: {overall_file}")
 
         df = pd.read_csv(overall_file)
-        
+
         # Parse date columns based on period
         if self.period == "monthly":
             df["month"] = pd.to_datetime(df["month"])
         else:
             df["week_start"] = pd.to_datetime(df["week_start"])
-        
+
         self._cache[cache_key] = df
         return df
 
     def load_agent_data(self, force_reload: bool = False) -> pd.DataFrame:
         """
         Load agent performance data.
-        
+
         Args:
             force_reload: Force reload from disk, ignoring cache
-            
+
         Returns:
             DataFrame with agent data
         """
@@ -92,23 +95,23 @@ class DataLoader:
             raise FileNotFoundError(f"Agent data file not found: {agent_file}")
 
         df = pd.read_csv(agent_file)
-        
+
         # Parse date columns based on period
         if self.period == "monthly":
             df["month"] = pd.to_datetime(df["month"])
         else:
             df["week_start"] = pd.to_datetime(df["week_start"])
-        
+
         self._cache[cache_key] = df
         return df
 
     def load_channel_data(self, force_reload: bool = False) -> pd.DataFrame:
         """
         Load channel metrics data.
-        
+
         Args:
             force_reload: Force reload from disk, ignoring cache
-            
+
         Returns:
             DataFrame with channel data
         """
@@ -121,23 +124,23 @@ class DataLoader:
             raise FileNotFoundError(f"Channel data file not found: {channel_file}")
 
         df = pd.read_csv(channel_file)
-        
+
         # Parse date columns based on period
         if self.period == "monthly":
             df["month"] = pd.to_datetime(df["month"])
         else:
             df["week_start"] = pd.to_datetime(df["week_start"])
-        
+
         self._cache[cache_key] = df
         return df
 
     def load_calls_data(self, force_reload: bool = False) -> pd.DataFrame:
         """
         Load detailed calls data.
-        
+
         Args:
             force_reload: Force reload from disk, ignoring cache
-            
+
         Returns:
             DataFrame with calls data
         """
@@ -151,13 +154,13 @@ class DataLoader:
 
         df = pd.read_csv(calls_file)
         df["date"] = pd.to_datetime(df["date"])
-        
+
         # Parse period-specific date columns
         if self.period == "monthly":
             df["month"] = pd.to_datetime(df["month"])
         else:
             df["week_start"] = pd.to_datetime(df["week_start"])
-        
+
         self._cache[cache_key] = df
         return df
 
@@ -168,7 +171,7 @@ class DataLoader:
     def get_date_range(self) -> tuple:
         """
         Get the date range of available data.
-        
+
         Returns:
             Tuple of (min_date, max_date)
         """
@@ -179,7 +182,7 @@ class DataLoader:
         """
         Get available periods (months or weeks) from overall data.
         Sorted from most recent to oldest.
-        
+
         Returns:
             DataFrame with period information
         """
@@ -189,20 +192,22 @@ class DataLoader:
             return result.sort_values("month", ascending=False).reset_index(drop=True)
         else:
             result = overall_df[["week_start"]].copy()
-            return result.sort_values("week_start", ascending=False).reset_index(drop=True)
+            return result.sort_values("week_start", ascending=False).reset_index(
+                drop=True
+            )
 
     @staticmethod
     def validate_data_integrity(df: pd.DataFrame, data_type: str) -> bool:
         """
         Validate data integrity for loaded datasets.
-        
+
         Args:
             df: DataFrame to validate
             data_type: Type of data (overall, agent, channel, calls)
-            
+
         Returns:
             True if data is valid
-            
+
         Raises:
             ValueError: If data integrity issues are found
         """

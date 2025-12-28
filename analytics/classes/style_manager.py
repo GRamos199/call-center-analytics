@@ -2,6 +2,7 @@
 Style Manager module.
 Centralizes all CSS styling and page configuration for the Streamlit dashboard.
 """
+
 import streamlit as st
 
 
@@ -10,9 +11,9 @@ class StyleManager:
 
     # Color scheme - Main project colors
     COLORS = {
-        "primary": "#3B82F6",      # Blue
-        "secondary": "#F63B83",    # Pink/Magenta
-        "accent": "#83F63B",       # Green/Lime
+        "primary": "#3B82F6",  # Blue
+        "secondary": "#F63B83",  # Pink/Magenta
+        "accent": "#83F63B",  # Green/Lime
         "primary_hover": "#2563eb",
         "background": "#F2F2F2",
         "text_dark": "#333333",
@@ -41,7 +42,7 @@ class StyleManager:
     def get_main_css(cls) -> str:
         """
         Get the main CSS styles for the application.
-        
+
         Returns:
             CSS string with all main styles.
         """
