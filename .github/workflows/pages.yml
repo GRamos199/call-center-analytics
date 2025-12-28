@@ -1,7 +1,6 @@
 # =============================================================================
-# GitHub Pages Static Dashboard Export
-# Note: Streamlit apps cannot run directly on GitHub Pages as it's static hosting.
-# This workflow creates a static HTML snapshot/documentation of the dashboard.
+# GitHub Pages - Dashboard Screenshots & Documentation
+# Generates screenshots of the Streamlit dashboard and publishes to Pages
 # =============================================================================
 
 name: 📄 GitHub Pages
@@ -10,28 +9,25 @@ on:
   push:
     branches: [main]
     paths:
-      - 'docs/**'
       - 'analytics/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
   # ===========================================================================
-  # Build Static Documentation
+  # Generate Screenshots
   # ===========================================================================
-  build:
-    name: 📦 Build Documentation
+  screenshots:
+    name: 📸 Generate Screenshots
     runs-on: ubuntu-latest
 
     steps:
@@ -44,177 +40,277 @@ jobs:
           python-version: "3.12"
           cache: 'pip'
 
-      - name: 📦 Install dependencies
+      - name: �� Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install mkdocs mkdocs-material pymdown-extensions
 
-      - name: 📊 Generate data summary
+      - name: 🎭 Install Playwright
         run: |
-          mkdir -p docs/data
-          python -c "
-          import json
-          from analytics.utils.data_loader import DataLoader
-          from analytics.utils.metric_loader import MetricLoader
+          pip install playwright
+          playwright install chromium
+          playwright install-deps chromium
 
-          summary = {}
-
-          # Monthly data
-          dl = DataLoader(period='monthly')
-          ml = MetricLoader(dl)
-          summary['monthly'] = {
-              'periods': dl.load_overall_data().shape[0],
-              'agents': dl.load_agent_data()['agent_name'].nunique() if 'agent_name' in dl.load_agent_data().columns else 0,
-              'channels': dl.load_channel_data()['channel'].nunique() if 'channel' in dl.load_channel_data().columns else 0,
-          }
-
-          # Weekly data
-          dl.set_period('weekly')
-          summary['weekly'] = {
-              'periods': dl.load_overall_data().shape[0],
-              'agents': dl.load_agent_data()['agent_name'].nunique() if 'agent_name' in dl.load_agent_data().columns else 0,
-              'channels': dl.load_channel_data()['channel'].nunique() if 'channel' in dl.load_channel_data().columns else 0,
-          }
-
-          with open('docs/data/summary.json', 'w') as f:
-              json.dump(summary, f, indent=2)
-
-          print('✅ Data summary generated')
-          "
-
-      - name: 📝 Build documentation
+      - name: 🚀 Start Streamlit app
         run: |
-          # Create docs if not exists
-          mkdir -p docs
+          cd analytics && streamlit run app.py --server.port 8501 --server.headless true &
+          echo "Waiting for Streamlit to start..."
+          sleep 15
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:8501/_stcore/health || exit 1
+          echo "✅ Streamlit is running"
 
-          # Generate index.html with project info
-          cat > docs/index.html << 'EOF'
+      - name: 📸 Take screenshots
+        run: |
+          mkdir -p docs/screenshots
+          
+          python << 'SCREENSHOT_SCRIPT'
+          import asyncio
+          from playwright.async_api import async_playwright
+          import time
+
+          async def take_screenshots():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch()
+                  context = await browser.new_context(
+                      viewport={'width': 1920, 'height': 1080},
+                      device_scale_factor=2
+                  )
+                  page = await context.new_page()
+                  
+                  base_url = "http://localhost:8501"
+                  
+                  # Screenshot 1: Welcome Page
+                  print("📸 Taking screenshot: Welcome Page")
+                  await page.goto(base_url)
+                  await page.wait_for_timeout(3000)
+                  await page.screenshot(path="docs/screenshots/01-welcome.png", full_page=True)
+                  
+                  # Click Monthly Report button
+                  print("📸 Taking screenshot: Monthly Report")
+                  try:
+                      await page.click('button:has-text("Monthly Report")')
+                      await page.wait_for_timeout(3000)
+                      await page.screenshot(path="docs/screenshots/02-monthly-report.png", full_page=True)
+                  except Exception as e:
+                      print(f"Could not click Monthly Report: {e}")
+                  
+                  # Click Weekly Report button
+                  print("📸 Taking screenshot: Weekly Report")
+                  try:
+                      await page.click('button:has-text("Weekly Report")')
+                      await page.wait_for_timeout(3000)
+                      await page.screenshot(path="docs/screenshots/03-weekly-report.png", full_page=True)
+                  except Exception as e:
+                      print(f"Could not click Weekly Report: {e}")
+                  
+                  await browser.close()
+                  print("✅ All screenshots taken!")
+
+          asyncio.run(take_screenshots())
+          SCREENSHOT_SCRIPT
+
+      - name: 📄 Generate PDF from screenshots
+        run: |
+          pip install img2pdf pillow
+          
+          python << 'PDF_SCRIPT'
+          import img2pdf
+          from PIL import Image
+          import os
+
+          screenshots_dir = "docs/screenshots"
+          output_pdf = "docs/dashboard-preview.pdf"
+
+          # Get all PNG files sorted
+          images = sorted([
+              os.path.join(screenshots_dir, f) 
+              for f in os.listdir(screenshots_dir) 
+              if f.endswith('.png')
+          ])
+
+          if images:
+              # Convert to PDF
+              with open(output_pdf, "wb") as f:
+                  f.write(img2pdf.convert(images))
+              print(f"✅ PDF generated: {output_pdf}")
+          else:
+              print("⚠️ No screenshots found")
+          PDF_SCRIPT
+
+      - name: 📝 Generate HTML gallery
+        run: |
+          cat > docs/index.html << 'HTML_EOF'
           <!DOCTYPE html>
           <html lang="en">
           <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Call Center Analytics Dashboard</title>
+              <title>Call Center Analytics - Dashboard Preview</title>
               <style>
                   * { margin: 0; padding: 0; box-sizing: border-box; }
                   body {
                       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                       background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
                       min-height: 100vh;
-                      display: flex;
-                      justify-content: center;
-                      align-items: center;
-                      padding: 20px;
+                      padding: 40px 20px;
                   }
                   .container {
-                      background: rgba(255,255,255,0.95);
-                      border-radius: 24px;
-                      padding: 50px;
-                      max-width: 800px;
+                      max-width: 1400px;
+                      margin: 0 auto;
+                  }
+                  header {
                       text-align: center;
-                      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                      margin-bottom: 50px;
                   }
                   .logo { font-size: 80px; margin-bottom: 20px; }
                   h1 {
-                      font-size: 36px;
+                      font-size: 42px;
                       background: linear-gradient(135deg, #3B82F6, #F63B83, #83F63B);
                       -webkit-background-clip: text;
                       -webkit-text-fill-color: transparent;
                       margin-bottom: 15px;
                   }
-                  .subtitle { color: #666; font-size: 18px; margin-bottom: 30px; }
-                  .info-box {
-                      background: linear-gradient(135deg, #3B82F610, #F63B8310);
-                      border-radius: 16px;
-                      padding: 25px;
-                      margin: 20px 0;
+                  .subtitle { color: rgba(255,255,255,0.7); font-size: 18px; margin-bottom: 30px; }
+                  .actions {
+                      display: flex;
+                      justify-content: center;
+                      gap: 20px;
+                      flex-wrap: wrap;
+                      margin-bottom: 50px;
                   }
-                  .info-box h3 { color: #3B82F6; margin-bottom: 15px; }
-                  .info-box p { color: #555; line-height: 1.6; }
-                  .features {
-                      display: grid;
-                      grid-template-columns: repeat(2, 1fr);
-                      gap: 15px;
-                      margin: 30px 0;
+                  .btn {
+                      display: inline-flex;
+                      align-items: center;
+                      gap: 10px;
+                      padding: 15px 30px;
+                      border-radius: 30px;
+                      text-decoration: none;
+                      font-weight: 600;
+                      font-size: 16px;
+                      transition: all 0.3s;
                   }
-                  .feature {
-                      background: #f8f9fa;
-                      padding: 20px;
-                      border-radius: 12px;
-                      border-left: 4px solid;
-                  }
-                  .feature:nth-child(1) { border-color: #3B82F6; }
-                  .feature:nth-child(2) { border-color: #F63B83; }
-                  .feature:nth-child(3) { border-color: #83F63B; }
-                  .feature:nth-child(4) { border-color: #F6B83B; }
-                  .feature h4 { margin-bottom: 5px; color: #333; }
-                  .feature p { font-size: 13px; color: #777; }
-                  .note {
-                      background: #fff3cd;
-                      border: 1px solid #ffc107;
-                      border-radius: 12px;
-                      padding: 20px;
-                      margin-top: 30px;
-                  }
-                  .note strong { color: #856404; }
-                  .links { margin-top: 30px; }
-                  .links a {
-                      display: inline-block;
-                      padding: 12px 30px;
+                  .btn-primary {
                       background: linear-gradient(135deg, #3B82F6, #F63B83);
                       color: white;
-                      text-decoration: none;
-                      border-radius: 30px;
-                      margin: 5px;
-                      font-weight: 600;
-                      transition: transform 0.3s;
                   }
-                  .links a:hover { transform: translateY(-3px); }
+                  .btn-secondary {
+                      background: rgba(255,255,255,0.1);
+                      color: white;
+                      border: 2px solid rgba(255,255,255,0.3);
+                  }
+                  .btn:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+                  .gallery {
+                      display: grid;
+                      gap: 30px;
+                  }
+                  .screenshot {
+                      background: rgba(255,255,255,0.05);
+                      border-radius: 16px;
+                      overflow: hidden;
+                      border: 1px solid rgba(255,255,255,0.1);
+                  }
+                  .screenshot-header {
+                      padding: 20px;
+                      background: rgba(0,0,0,0.2);
+                      display: flex;
+                      align-items: center;
+                      gap: 15px;
+                  }
+                  .screenshot-header .icon { font-size: 28px; }
+                  .screenshot-header h3 { color: white; font-size: 20px; }
+                  .screenshot-header p { color: rgba(255,255,255,0.6); font-size: 14px; }
+                  .screenshot img {
+                      width: 100%;
+                      height: auto;
+                      display: block;
+                  }
+                  .note {
+                      background: rgba(59, 130, 246, 0.2);
+                      border: 1px solid #3B82F6;
+                      border-radius: 12px;
+                      padding: 20px;
+                      margin-top: 50px;
+                      text-align: center;
+                  }
+                  .note p { color: rgba(255,255,255,0.8); }
+                  .note a { color: #3B82F6; }
+                  footer {
+                      text-align: center;
+                      margin-top: 50px;
+                      color: rgba(255,255,255,0.5);
+                      font-size: 14px;
+                  }
               </style>
           </head>
           <body>
               <div class="container">
-                  <div class="logo">📊</div>
-                  <h1>Call Center Analytics</h1>
-                  <p class="subtitle">Performance Dashboard Documentation</p>
+                  <header>
+                      <div class="logo">📊</div>
+                      <h1>Call Center Analytics</h1>
+                      <p class="subtitle">Interactive Dashboard Preview</p>
+                      <div class="actions">
+                          <a href="dashboard-preview.pdf" class="btn btn-primary">
+                              📄 Download PDF Preview
+                          </a>
+                          <a href="https://github.com/GRamos199/call-center-analytics" class="btn btn-secondary">
+                              📁 View Repository
+                          </a>
+                      </div>
+                  </header>
 
-                  <div class="info-box">
-                      <h3>About This Project</h3>
-                      <p>A comprehensive Streamlit dashboard for call center analytics, featuring real-time metrics, agent performance tracking, and multi-channel analysis.</p>
-                  </div>
+                  <div class="gallery">
+                      <div class="screenshot">
+                          <div class="screenshot-header">
+                              <span class="icon">🏠</span>
+                              <div>
+                                  <h3>Welcome Page</h3>
+                                  <p>Animated landing page with dashboard introduction</p>
+                              </div>
+                          </div>
+                          <img src="screenshots/01-welcome.png" alt="Welcome Page">
+                      </div>
 
-                  <div class="features">
-                      <div class="feature">
-                          <h4>📈 Overall Performance</h4>
-                          <p>Key metrics including AHT, FCR, and CSAT scores</p>
+                      <div class="screenshot">
+                          <div class="screenshot-header">
+                              <span class="icon">📅</span>
+                              <div>
+                                  <h3>Monthly Report</h3>
+                                  <p>Comprehensive monthly analytics with KPIs and trends</p>
+                              </div>
+                          </div>
+                          <img src="screenshots/02-monthly-report.png" alt="Monthly Report">
                       </div>
-                      <div class="feature">
-                          <h4>📡 Channel Analytics</h4>
-                          <p>Phone, email, chat and WhatsApp breakdown</p>
-                      </div>
-                      <div class="feature">
-                          <h4>📞 Calls Performance</h4>
-                          <p>Duration trends and resolution rates</p>
-                      </div>
-                      <div class="feature">
-                          <h4>👥 Agent Performance</h4>
-                          <p>Rankings and productivity scores</p>
+
+                      <div class="screenshot">
+                          <div class="screenshot-header">
+                              <span class="icon">📆</span>
+                              <div>
+                                  <h3>Weekly Report</h3>
+                                  <p>Detailed weekly performance metrics and comparisons</p>
+                              </div>
+                          </div>
+                          <img src="screenshots/03-weekly-report.png" alt="Weekly Report">
                       </div>
                   </div>
 
                   <div class="note">
-                      <strong>⚠️ Note:</strong> Streamlit applications require a server and cannot run directly on GitHub Pages. This page serves as documentation. Deploy the application using Docker on AWS ECS or similar platforms.
+                      <p>
+                          💡 <strong>Note:</strong> This is a static preview. 
+                          To run the interactive dashboard locally, clone the repository and run:
+                          <br><br>
+                          <code style="background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 8px; color: #83F63B;">
+                              docker-compose up
+                          </code>
+                      </p>
                   </div>
 
-                  <div class="links">
-                      <a href="https://github.com/GRamos199/call-center-analytics">📁 View Repository</a>
-                      <a href="https://github.com/GRamos199/call-center-analytics#readme">📖 Documentation</a>
-                  </div>
+                  <footer>
+                      <p>Generated automatically by GitHub Actions • Call Center Analytics Dashboard</p>
+                  </footer>
               </div>
           </body>
           </html>
-          EOF
+          HTML_EOF
 
       - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -230,7 +326,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    needs: build
+    needs: screenshots
 
     steps:
       - name: 🚀 Deploy to GitHub Pages
