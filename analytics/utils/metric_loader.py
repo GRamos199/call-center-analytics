@@ -204,12 +204,14 @@ class MetricLoader:
         if channel_df.empty:
             return pd.DataFrame(columns=[
                 "channel", "total_interactions", "avg_handle_time_minutes",
-                "resolution_rate", "customer_satisfaction_score", "total_cost"
+                "resolution_rate", "customer_satisfaction_score", "total_cost",
+                "cost_per_interaction"
             ])
         
         return channel_df[[
             "channel", "total_interactions", "avg_handle_time_minutes",
-            "resolution_rate", "customer_satisfaction_score", "total_cost"
+            "resolution_rate", "customer_satisfaction_score", "total_cost",
+            "cost_per_interaction"
         ]]
 
     def calculate_deltas(
